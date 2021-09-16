@@ -1,0 +1,30 @@
+{
+    "version": "s3.0",
+    "token": "NzgwOTI3MzY3NjI2NzUyMDAw.X72NSQ.rLYNG66dC7UEWj3F9_lBTdzsh5A",
+
+    "dailyValues": {
+
+        "minimum": 500,
+        "maximum": 1500,
+        "bonus": 1000
+    },
+
+    "leaderboardValues": {
+
+        "pageLength": 8
+    },
+
+    "lotteryValues": {
+
+        "ticketPrice": 1000,
+        "bonusRatio": 1
+    },
+
+    "sql": {
+
+        "host": "localhost",
+        "user": "root",
+        "password": "73TW#8aG^5sPw$QdmA!%fp#I",
+        "database": "oggdb"
+    }
+}
