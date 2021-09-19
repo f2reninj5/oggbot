@@ -12,44 +12,6 @@ client.userCommands = new Discord.Collection()
 client.messageCommands = new Discord.Collection()
 client.jobs = new Discord.Collection()
 
-async function loadApplicationCommands(collections) {
-
-    for (collection of collections) {
-
-        await collection.forEach(async command => {
-
-            client.api.applications(client.user.id).guilds('795699156399685712').commands.post({ data: command.data })
-            client.api.applications(client.user.id).commands.post({ data: command.data })
-        })
-    }
-}
-
-async function removeApplicationCommands(collections) {
-
-    let applicationCommands = await client.api.applications(client.user.id).guilds('795699156399685712').commands.get()
-
-    applicationCommands.forEach(async applicationCommand => {
-        
-        let command
-
-        for (i = 0; i < 3; i ++) {
-
-            command = collections[i].find(command => command.data.name == applicationCommand.name && command.data.type == applicationCommand.type)
-
-            if (command) {
-
-                break
-            }
-        }
-
-        if (!command) {
-
-            console.log(`Deleting ${applicationCommand.name}, type ${applicationCommand.type}`)
-            client.api.applications(client.user.id).guilds('795699156399685712').commands(applicationCommand.id).delete()
-        }
-    })
-}
-
 async function addUserToDatabase(user) {
 
     let rows = await oggbot.queryPool(`SELECT id FROM users WHERE id = '${user.id}'`)

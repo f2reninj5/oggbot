@@ -91,9 +91,46 @@ function startJobs(collection) {
     for (jobName of collection.map(job => job.data.name)) {
 
         let job = collection.get(jobName)
-        
+
         job.execute()
     }
+}
+
+async function loadApplicationCommands(collections) {
+
+    for (collection of collections) {
+
+        await collection.forEach(async command => {
+
+            client.api.applications(client.user.id).commands.post({ data: command.data })
+        })
+    }
+}
+
+async function removeApplicationCommands(collections) {
+
+    let applicationCommands = await client.api.applications(client.user.id).commands.get()
+
+    applicationCommands.forEach(async applicationCommand => {
+        
+        let command
+
+        for (i = 0; i < 3; i ++) {
+
+            command = collections[i].find(command => command.data.name == applicationCommand.name && command.data.type == applicationCommand.type)
+
+            if (command) {
+
+                break
+            }
+        }
+
+        if (!command) {
+
+            console.log(`Deleting ${applicationCommand.name}, type ${applicationCommand.type}`)
+            client.api.applications(client.user.id).guilds('795699156399685712').commands(applicationCommand.id).delete()
+        }
+    })
 }
 
 function roundMoney(money) {
@@ -375,6 +412,8 @@ module.exports = {
     loadCommands: loadCommands,
     loadSubcommands: loadSubcommands,
     loadJobs: loadJobs,
+    loadApplicationCommands: loadApplicationCommands,
+    removeApplicationCommands: removeApplicationCommands,
     startJobs: startJobs,
     roundMoney: roundMoney,
     formatMoney: formatMoney,
