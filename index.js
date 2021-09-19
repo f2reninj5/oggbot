@@ -5,7 +5,7 @@ const oggbot = require('./oggbot')
 const { version, token } = require('./config.json')
 const Discord = require('discord.js')
 
-const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES, Discord.Intents.FLAGS.DIRECT_MESSAGES] })
+const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAGES'] })
 
 client.chatCommands = new Discord.Collection()
 client.userCommands = new Discord.Collection()
@@ -31,7 +31,8 @@ client.on('ready', async () => {
     console.log('Jobs loaded')
     oggbot.startJobs(client.jobs)
     console.log('Jobs started')
-    // await loadApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
+    // await oggbot.loadApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
+    // await oggbot.removeApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
 
     console.log(`Version: ${version}`)
 })
