@@ -65,6 +65,10 @@ client.on('ready', async () => {
 
     oggbot.loadCommands([client.chatCommands, client.userCommands, client.messageCommands], './commands')
     console.log('Commands loaded')
+    oggbot.loadJobs(client.jobs, './jobs')
+    console.log('Jobs loaded')
+    oggbot.startJobs(client.jobs)
+    console.log('Jobs started')
     // await loadApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
 
     console.log(`Version: ${version}`)

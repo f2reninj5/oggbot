@@ -53,11 +53,11 @@ module.exports = {
 
             // create canvas
             const canvas = Canvas.createCanvas(480, 200)
-            const ctx = canvas.getContext('2d')
+            const context = canvas.getContext('2d')
 
             // load pay image and draw background
             const background = await Canvas.loadImage(path.resolve(__dirname, './pay.png'))
-            ctx.drawImage(background, 0, 0, canvas.width, canvas.height)
+            context.drawImage(background, 0, 0, canvas.width, canvas.height)
 
             let avatarSize = 134
 
@@ -66,27 +66,27 @@ module.exports = {
             const recipientAvatar = await Canvas.loadImage(recipient.displayAvatarURL({ format: 'jpg' }))
 
             // set text settings
-            ctx.textBaseline = 'middle'
-            ctx.fillStyle = '#e5e5e5'
-            ctx.font = '24px calibri'
-            ctx.textAlign = 'center'
+            context.textBaseline = 'middle'
+            context.fillStyle = '#e5e5e5'
+            context.font = '24px calibri'
+            context.textAlign = 'center'
 
             // write usernames
-            ctx.fillText(sender.username, 106, (canvas.height / 2) + (avatarSize / 2) + 16)
-            ctx.fillText(recipient.username, 374, (canvas.height / 2) + (avatarSize / 2) + 16)
-            ctx.font = '36px calibri'
-            ctx.fillText(oggbot.formatMoney(amount), canvas.width / 2, 16)
+            context.fillText(sender.username, 106, (canvas.height / 2) + (avatarSize / 2) + 16)
+            context.fillText(recipient.username, 374, (canvas.height / 2) + (avatarSize / 2) + 16)
+            context.font = '36px calibri'
+            context.fillText(oggbot.formatMoney(amount), canvas.width / 2, 16)
 
             // create rounded rectangle clipping mask
-            ctx.beginPath(); 
-            roundedRectangle(39, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize, 34, ctx)
-            roundedRectangle(307, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize, 34, ctx)
-            ctx.closePath()
-            ctx.clip()
+            context.beginPath(); 
+            roundedRectangle(39, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize, 34, context)
+            roundedRectangle(307, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize, 34, context)
+            context.closePath()
+            context.clip()
 
             // draw avatar images
-            ctx.drawImage(senderAvatar, 39, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize)
-            ctx.drawImage(recipientAvatar, 307, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize)
+            context.drawImage(senderAvatar, 39, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize)
+            context.drawImage(recipientAvatar, 307, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize)
 
             // turn canvas into image attachment
             const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'transaction.png')

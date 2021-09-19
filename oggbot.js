@@ -65,6 +65,37 @@ function loadSubcommands(groups, directory) {
     }
 }
 
+function loadJobs(collection, directory) {
+
+    let jobFiles = fs.readdirSync(directory)
+
+    for (file of jobFiles) {
+
+        let path = `${directory}/${file}`
+
+        if (file.endsWith('.js')) {
+
+            let job = require(path)
+
+            collection.set(job.data.name, job)
+
+        } else if (fs.lstatSync(path).isDirectory()) {
+
+            loadJobs(collection, path)
+        }
+    }
+}
+
+function startJobs(collection) {
+
+    for (jobName of collection.map(job => job.data.name)) {
+
+        let job = collection.get(jobName)
+        
+        job.execute()
+    }
+}
+
 function roundMoney(money) {
 
     return parseFloat(parseFloat(money).toFixed(2))
@@ -343,6 +374,8 @@ module.exports = {
     fetchUser: fetchUser,
     loadCommands: loadCommands,
     loadSubcommands: loadSubcommands,
+    loadJobs: loadJobs,
+    startJobs: startJobs,
     roundMoney: roundMoney,
     formatMoney: formatMoney,
     queryPool: queryPool,
