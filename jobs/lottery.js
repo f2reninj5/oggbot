@@ -53,7 +53,7 @@ module.exports = {
 
             fs.writeFileSync(path.resolve(__dirname, `${__root}/commands/money/lottery/winners.json`), JSON.stringify(winners))
             
-            await oggbot.queryPool(`UPDATE users SET balance = balance + ${winner.amount} WHERE id = '${winner.user.id}'`)
+            await oggbot.moneyTransaction(client.user, winner.user, winner.amount, 'lottery winner')
             await oggbot.queryPool(`DELETE FROM lottery`)
 
             const winnerEmbed = new Discord.MessageEmbed()
