@@ -1,4 +1,4 @@
-const { sql } = require('./config.json')
+const { sql } = require('./tokens.json')
 const Discord = require('discord.js')
 const mysql = require('mysql')
 const path = require('path')

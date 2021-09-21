@@ -1,6 +1,5 @@
 {
     "version": "s3.0",
-    "token": "NzgwOTI3MzY3NjI2NzUyMDAw.X72NSQ.t0WbssQotzLh6-MSYJWupkiMFhk",
 
     "dailyValues": {
 
@@ -18,13 +17,5 @@
 
         "ticketPrice": 1000,
         "bonusRatio": 1
-    },
-
-    "sql": {
-
-        "host": "localhost",
-        "user": "root",
-        "password": "73TW#8aG^5sPw$QdmA!%fp#I",
-        "database": "oggdb"
     }
 }

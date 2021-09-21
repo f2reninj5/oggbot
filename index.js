@@ -2,7 +2,8 @@
 
 // imports
 const oggbot = require('./oggbot')
-const { version, token } = require('./config.json')
+const { version } = require('./config.json')
+const { token } = require('./tokens.json')
 const Discord = require('discord.js')
 
 const client = new Discord.Client({ intents: ['GUILDS', 'GUILD_MESSAGES', 'DIRECT_MESSAGES'] })
