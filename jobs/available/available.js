@@ -1,3 +1,4 @@
+const oggbot = require(`${__root}/oggbot`)
 const Discord = require('discord.js')
 const cron = require('cron')
 const path = require('path')
@@ -22,12 +23,12 @@ module.exports = {
     },
     async execute() {
 
-        const myGuildId = '745569983542853643'
+        let guild = await oggbot.fetchHomeGuild()
         let currentHour = new Date().getHours()
 
         if (currentHour >= 12  && currentHour < 24) {
 
-            let availableMessage = await createAvailableMessage(myGuildId)
+            let availableMessage = await createAvailableMessage(guild)
 
             const filter = button => !button.user.bot && ['available', 'game', 'occupied'].includes(button.customId)
             const availableCollector = availableMessage.createMessageComponentCollector({ filter })
@@ -35,10 +36,9 @@ module.exports = {
             updateAvailable(availableCollector)
         }
 
-        async function createAvailableMessage(guildID) {
+        async function createAvailableMessage(guild) {
 
-            let guild = await client.guilds.fetch(guildID)
-            let channel = guild.channels.cache.find(channel => channel.name == 'available')
+            let channel = (await guild.channels.fetch()).filter(channel => channel.name == 'available').first()
         
             if (!channel) {
         
@@ -163,12 +163,12 @@ module.exports = {
                     let game
 
                     let message = await user.send({ content: 'You want to play: ' })
-                        let channel = message.channel
-                        game = await channel.awaitMessages(message => message.author.id == user.id, { max: 1, time: 1000 * 60 }).then(collected => {
-        
-                            console.log(collected)
-                            return collected.first().content.replace(/\n/g, ' ').slice(0, 19)
-                        })
+                    let channel = message.channel
+                    game = await channel.awaitMessages(message => message.author.id == user.id, { max: 1, time: 1000 * 60 }).then(collected => {
+    
+                        console.log(collected)
+                        return collected.first().content.replace(/\n/g, ' ').slice(0, 19)
+                    })
 
                     try {
         
@@ -206,14 +206,14 @@ module.exports = {
                 }
         
                 fs.writeFileSync(path.resolve(__dirname, './available.json'), JSON.stringify({ 'available': available, 'occupied': occupied }))
-                createAvailableMessage(myGuildId)
+                createAvailableMessage(await oggbot.fetchHomeGuild())
             })
         }
         
-        const start = new cron.CronJob('00 00 12 * * *', async () => {
+        const start = new cron.CronJob('0 0 12 * * *', async () => {
             
-            let guild = await client.guilds.fetch(myGuildId)
-            let channel = guild.channels.cache.find(channel => channel.name == 'available')
+            let guild = await oggbot.fetchHomeGuild()
+            let channel = (await guild.channels.fetch()).filter(channel => channel.name == 'available').first()
         
             if (!channel) {
         
@@ -223,16 +223,17 @@ module.exports = {
         
             await channel.bulkDelete(100)
         
-            fs.writeFileSync('available.json', JSON.stringify({ 'available': [], 'occupied': [] }))
-            let availableMessage = await createAvailableMessage(myGuildId)
-            let availableCollector = availableMessage.createReactionCollector((reaction, user) => !user.client && ['available', 'game', 'occupied'].includes(reaction.emoji.name))
+            fs.writeFileSync(path.resolve(__dirname, './available.json'), JSON.stringify({ 'available': [], 'occupied': [] }))
+            let availableMessage = await createAvailableMessage(await oggbot.fetchHomeGuild())
+            const filter = button => !button.user.bot && ['available', 'game', 'occupied'].includes(button.customId)
+            const availableCollector = availableMessage.createMessageComponentCollector({ filter })
             updateAvailable(availableCollector)
         
         }, { timeZone: 'Europe/London' })
         
         start.start()
         
-        const end = new cron.CronJob('00 00 00 * * *', async () => {
+        const end = new cron.CronJob('0 0 0 * * *', async () => {
             
             try {
 
@@ -241,8 +242,8 @@ module.exports = {
 
             } catch { }
 
-            let guild = await client.guilds.fetch(myGuildId)
-            let channel = guild.channels.cache.find(channel => channel.name == 'available')
+            let guild = await oggbot.fetchHomeGuild()
+            let channel = (await guild.channels.fetch()).filter(channel => channel.name == 'available').first()
         
             if (!channel) {
         

@@ -1,6 +1,12 @@
 {
     "version": "s3.0",
 
+    "guildIds": {
+
+        "home": "745569983542853643",
+        "dev": "795699156399685712"
+    },
+
     "dailyValues": {
 
         "minimum": 500,

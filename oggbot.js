@@ -1,4 +1,5 @@
 const { sql } = require('./tokens.json')
+const { guildIds } = require('./config.json')
 const Discord = require('discord.js')
 const mysql = require('mysql')
 const path = require('path')
@@ -207,6 +208,20 @@ async function fetchUser(id) {
     return user
 }
 
+async function fetchHomeGuild() {
+
+    let guild = await client.guilds.fetch(guildIds.home)
+
+    return guild
+}
+
+async function fetchDevGuild() {
+
+    let guild = await client.guilds.fetch(guildIds.dev)
+
+    return guild
+}
+
 class User extends Discord.User {
 
     constructor(user) {
@@ -409,6 +424,8 @@ module.exports = {
     User: User,
 
     fetchUser: fetchUser,
+    fetchHomeGuild: fetchHomeGuild,
+    fetchDevGuild: fetchDevGuild,
     loadCommands: loadCommands,
     loadSubcommands: loadSubcommands,
     loadJobs: loadJobs,
