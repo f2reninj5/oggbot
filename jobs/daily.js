@@ -14,7 +14,7 @@ module.exports = {
             }
         ]
     },
-    execute() {
+    async execute() {
 
         const reset = new cron.CronJob('0 0 0 * * *', async () => {
 

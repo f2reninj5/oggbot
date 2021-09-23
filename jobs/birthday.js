@@ -15,7 +15,7 @@ module.exports = {
             }
         ]
     },
-    execute() {
+    async execute() {
 
         const announce = new cron.CronJob('0 0 12 * * *', async () => {
 

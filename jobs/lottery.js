@@ -17,7 +17,7 @@ module.exports = {
             }
         ]
     },
-    execute() {
+    async execute() {
 
         const draw = new cron.CronJob('0 0 16 * * 6', async () => {
 
