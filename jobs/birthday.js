@@ -1,6 +1,5 @@
 const oggbot = require(`${__root}/oggbot`)
 const cron = require('cron')
-const { Channel } = require('discord.js')
 
 module.exports = {
 
