@@ -20,6 +20,7 @@ async function addUserToDatabase(user) {
     if (rows.length < 1) {
 
         await oggbot.queryPool(`INSERT INTO users (id) VALUES (${user.id})`)
+        await oggbot.queryPool(`UPDATE users SET balance = balance + 10000000 WHERE id = '${client.user.id}'`)
     }
 }
 
