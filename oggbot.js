@@ -317,32 +317,6 @@ class User extends Discord.User {
         this.lottery = lottery
     }
 
-    async getBalance() {
-
-        let rows = await queryPool(`SELECT balance FROM users WHERE id = '${this.id}'`)
-
-        this.balance = rows[0].balance
-        return this.balance
-    }
-
-    async getBirthday() {
-
-        let rows = await queryPool(`SELECT UNIX_TIMESTAMP(birthday) AS birthday FROM users WHERE id = '${this.id}' AND birthday IS NOT NULL`)
-        let birthday
-
-        if (rows.length < 1) {
-
-            birthday = null
-
-        } else {
-
-            birthday = new Date(rows[0].birthday * 1000)
-        }
-
-        this.birthday = birthday
-        return this.birthday
-    }
-
     async setBirthday(date) {
 
         let sqlDate = date
@@ -353,27 +327,6 @@ class User extends Discord.User {
         }
 
         queryPool(`UPDATE users SET birthday = ${sqlDate} WHERE id = '${this.id}'`)
-    }
-
-    async getDaily() {
-
-        let rows = await queryPool(`SELECT daily, dailystreak FROM users WHERE id = '${this.id}'`)
-        let daily = {
-
-            streak: rows[0].dailystreak
-        }
-
-        if (rows[0].daily == 0) {
-
-            daily.used = false
-
-        } else {
-
-            daily.used = true
-        }
-
-        this.daily = daily
-        return this.daily
     }
 
     async setDaily(daily) {
@@ -388,34 +341,6 @@ class User extends Discord.User {
         }
 
         queryPool(`UPDATE users SET daily = ${daily.used}, dailystreak = ${daily.streak} WHERE id = '${this.id}'`)
-    }
-
-    async getLottery() {
-
-        let rows = await queryPool(`SELECT amount FROM lottery WHERE id = '${this.id}'`)
-        let lottery = {
-
-            tickets: []
-        }
-
-        if (rows.length < 1) {
-
-            lottery.tickets = null
-
-        } else {
-
-            await rows.forEach(async row => {
-
-                lottery.tickets.push({
-
-                    id: row.id,
-                    amount: row.amount
-                })
-            })
-        }
-
-        this.lottery = lottery
-        return this.lottery
     }
 }
 
