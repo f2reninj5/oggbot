@@ -79,7 +79,7 @@ module.exports = {
                 context.textAlign = 'start'
 
                 // write user and birthday
-                context.fillText(users[i].username, 96, heightReference + 32)
+                context.fillText(`${users[i].username}#${users[i].discriminator}`, 96, heightReference + 32)
                 context.fillText(users[i].birthday.toLocaleDateString(), width - 320, heightReference + 32)
             }
 
