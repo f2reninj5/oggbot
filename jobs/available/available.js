@@ -93,7 +93,7 @@ module.exports = {
             let occupied = JSON.parse(data)['occupied'] || []
         
             const availableEmbed = new Discord.MessageEmbed()
-                .setTitle('20:00')
+                .setTitle('Gaming 20:00')
         
             let availableList = []
             for (i = 0; i < available.length; i ++) {
