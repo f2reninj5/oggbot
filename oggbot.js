@@ -241,12 +241,15 @@ class User extends Discord.User {
 
         if (rows.length < 1) {
 
-            return null
+            this.inDatabase = false
+            
+            return
         }
 
         await this.#packBalance(rows)
         await this.#packBirthday(rows)
         await this.#packDaily(rows)
+        this.inDatabase = true
     }
 
     async #fetchLotteryData() {
@@ -265,13 +268,6 @@ class User extends Discord.User {
     }
 
     async #packBalance(rows) {
-
-        if (rows.length < 1) {
-
-            this.inDatabase = false
-
-            return
-        }
 
         this.balance = rows[0].balance
         this.inDatabase = false
