@@ -98,6 +98,13 @@ module.exports = {
         const recipient = await oggbot.fetchUser(interaction.options.getUser('recipient').id)
         const amount = oggbot.roundMoney(interaction.options.getNumber('amount'))
 
+        if (!recipient.inDatabase) {
+
+            interaction.editReply({ content: 'Recipient not in database.' })
+
+            return
+        }
+
         if (sender == recipient) {
 
             interaction.editReply({ content: 'You cannot pay yourself.' })
