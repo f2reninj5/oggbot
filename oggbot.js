@@ -256,15 +256,7 @@ class User extends Discord.User {
 
         let rows = await queryPool(`SELECT id, amount FROM lottery WHERE id = '${this.id}'`)
 
-        if (rows.length < 1) {
-
-            this.inDatabase = false
-            
-            return
-        }
-
         await this.#packLottery(rows)
-        this.inDatabase = true
     }
 
     async #packBalance(rows) {
