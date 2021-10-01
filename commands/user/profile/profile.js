@@ -52,7 +52,9 @@ module.exports = {
                     }
                 ]
             }
-        ]
+        ],
+
+        group: 'user'
     },
     async execute(interaction) {
 
