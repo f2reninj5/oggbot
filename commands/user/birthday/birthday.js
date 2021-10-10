@@ -120,8 +120,16 @@ module.exports = {
                     },
                     {
                         name: 'user',
-                        description: 'View your own birthday.',
-                        type: 1
+                        description: 'View a user\'s birthday.',
+                        type: 1,
+                        options: [
+
+                            {
+                                name: 'user',
+                                description: 'The user whose birthday to show.',
+                                type: 6
+                            }
+                        ]
                     }
                 ]
             }

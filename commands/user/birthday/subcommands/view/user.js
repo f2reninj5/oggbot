@@ -4,13 +4,22 @@ module.exports = {
 
     data: {
         name: 'user',
-        description: 'View your own birthday.',
+        description: 'View a user birthday.',
         type: 1,
+        options: [
+
+            {
+                name: 'user',
+                description: 'The user whose birthday to view',
+                type: 6
+            }
+        ],
         group: 'view'
     },
     async execute(interaction) {
 
-        const user = await oggbot.fetchUser(interaction.user.id)
+        const userId = interaction.options.getUser('user').id || interaction.user.id
+        const user = await oggbot.fetchUser(userId)
         
         if (!user.birthday) {
 
@@ -19,6 +28,6 @@ module.exports = {
             return
         }
 
-        interaction.editReply({ content: `<t:${user.birthday.valueOf() / 1000}:d>` })
+        interaction.editReply({ content: `${user.username}'s birthday: <t:${user.birthday.valueOf() / 1000}:d> (${user.age})` })
     }
 }
