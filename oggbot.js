@@ -2,13 +2,16 @@ const { sql } = require('./tokens.json')
 const { guildIds } = require('./config.json')
 const Discord = require('discord.js')
 const mysql = require('mysql')
+const Canvas = require('canvas')
 const path = require('path')
 const fs = require('fs')
 const pool = mysql.createPool({
+    
     host: sql.host,
     user: sql.user,
     password: sql.password,
-    database: sql.database
+    database: sql.database,
+    charset : 'utf8mb4'
 })
 
 function loadCommands(collections, directory) {
@@ -92,7 +95,7 @@ function startJobs(collection) {
     for (jobName of collection.map(job => job.data.name)) {
 
         let job = collection.get(jobName)
-
+        
         job.execute()
     }
 }
@@ -222,6 +225,14 @@ async function fetchDevGuild() {
     return guild
 }
 
+function registerFonts(name) {
+
+    Canvas.registerFont(`fonts/${name}/Regular.ttf`, { family: 'Oggbot', weight: 'regular', style: 'regular' })
+    Canvas.registerFont(`fonts/${name}/Bold.ttf`, { family: 'Oggbot', weight: 'bold', style: 'regular' })
+    Canvas.registerFont(`fonts/${name}/Italic.ttf`, { family: 'Oggbot', weight: 'regular', style: 'italic' })
+    Canvas.registerFont(`fonts/${name}/BoldItalic.ttf`, { family: 'Oggbot', weight: 'bold', style: 'italic' })
+}
+
 class User extends Discord.User {
 
     constructor(user) {
@@ -259,10 +270,48 @@ class User extends Discord.User {
         await this.#packLottery(rows)
     }
 
+    async fetchDetails() {
+
+        let row = (await queryPool(`SELECT title, location, description FROM users WHERE id = '${this.id}'`))[0]
+        let details = {
+
+            id: this.id,
+            title: row.title,
+            location: row.location,
+            description: row.description
+        }
+        
+        this.details = details
+    }
+
+    async fetchStyles() {
+
+        let styles = {
+            
+            id: this.id,
+            selected: null,
+            owned: null
+        }
+        let rows = await queryPool(`SELECT selected, owned FROM styles WHERE id = '${this.id}'`)
+        
+        if (rows.length < 1) {
+    
+            await queryPool(`INSERT INTO styles (id, selected, owned) VALUES (${this.id}, ${styles.selected}, ${JSON.stringify(styles.owned)})`)
+
+        } else {
+
+            let row = rows[0]
+
+            styles.selected = row.selected
+            styles.owned = JSON.parse(row.owned)
+        }
+
+        this.styles = styles
+    }
+
     async #packBalance(rows) {
 
         this.balance = rows[0].balance
-        this.inDatabase = false
     }
 
     async #packBirthday(rows) {
@@ -351,6 +400,73 @@ class User extends Discord.User {
 
         queryPool(`UPDATE users SET daily = ${daily.used}, dailystreak = ${daily.streak} WHERE id = '${this.id}'`)
     }
+
+    async setDetails(details) {
+
+        let sqlDetails = []
+
+        if (details.title || details.title == '') {
+
+            details.title = details.title.replace(/\'/g, `''`).replace(/\\/g, '')
+
+            if (details.title.length > 54) {
+
+                throw ['Title', 'the character limit is 54']
+            }
+
+            sqlDetails.push(`title = '${details.title}'`)
+        }
+
+        if (details.location || details.location == '') {
+
+            details.location = details.location.replace(/\'/g, `''`).replace(/\\/g, '')
+
+            if (details.location.length > 44) {
+
+                throw ['Location', 'the character limit is 44']
+            }
+
+            sqlDetails.push(`location = '${details.location}'`)
+        }
+
+        if (details.description || details.description == '') {
+
+            details.description = details.description.replace(/\'/g, `''`).replace(/\\/g, '')
+
+            if (details.description.length > 216) {
+
+                throw ['Description', 'the character limit is 216']
+            }
+
+            sqlDetails.push(`description = '${details.description}'`)
+        }
+
+        queryPool(`UPDATE users SET ${sqlDetails.join(', ')} WHERE id = '${this.id}'`)
+    }
+
+    async setStyle(style) {
+
+        let sqlStyle = style
+
+        if (style) {
+
+            await this.fetchStyles()
+
+            if (this.styles.owned === null || !this.styles.owned.includes(style)) {
+
+                throw 'you do not own this style'
+            }
+
+            if (this.styles.selected == style) {
+
+                throw 'you already have this style selected'
+            }
+
+            sqlStyle = `'${style}'`
+        }
+
+        queryPool(`UPDATE styles SET selected = ${sqlStyle} WHERE id = '${this.id}'`)
+    }
 }
 
 module.exports = {
@@ -369,5 +485,6 @@ module.exports = {
     roundMoney: roundMoney,
     formatMoney: formatMoney,
     queryPool: queryPool,
-    moneyTransaction: moneyTransaction
+    moneyTransaction: moneyTransaction,
+    registerFonts: registerFonts
 }

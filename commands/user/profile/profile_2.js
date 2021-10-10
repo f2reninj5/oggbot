@@ -1,5 +1,6 @@
 const oggbot = require(`${__root}/oggbot`)
 const Discord = require('discord.js')
+const Canvas = require('canvas')
 const path = require('path')
 
 module.exports = {
@@ -111,7 +112,7 @@ module.exports = {
 
             context.imageSmoothingEnabled = false
 
-            const background = await Canvas.loadImage(path.resolve(__dirname, `../styles/${user.styles.selected || 'citizen'}.png`))
+            const background = await Canvas.loadImage(path.resolve(__dirname, `./styles/${user.styles.selected || 'citizen'}.png`))
             context.drawImage(background, 0, 0, canvas.width, canvas.height)
 
             context.imageSmoothingEnabled = true

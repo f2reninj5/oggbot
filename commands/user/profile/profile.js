@@ -26,7 +26,7 @@ module.exports = {
             },
             {
                 name: 'set',
-                description: 'Manage your profile.',
+                description: 'Set details on your profile.',
                 type: 1,
                 options: [
 
@@ -49,6 +49,34 @@ module.exports = {
                         name: 'style',
                         description: 'Set your profile style.',
                         type: 3
+                    }
+                ]
+            },
+            {
+                name: 'remove',
+                description: 'Remove details from your profile.',
+                type: 1,
+                options: [
+
+                    {
+                        name: 'title',
+                        description: 'Remove your title.',
+                        type: 5
+                    },
+                    {
+                        name: 'location',
+                        description: 'Remove your location.',
+                        type: 5
+                    },
+                    {
+                        name: 'description',
+                        description: 'Remove your description.',
+                        type:5
+                    },
+                    {
+                        name: 'style',
+                        description: 'Remove your style.',
+                        type:5
                     }
                 ]
             }
