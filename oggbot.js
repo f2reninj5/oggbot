@@ -100,22 +100,25 @@ function startJobs(collection) {
     }
 }
 
+// improve async in application command functions
+// possibly add separate functions for adding commands to or removing commands from a guild
+
 async function loadApplicationCommands(collections) {
 
     for (collection of collections) {
 
-        await collection.forEach(async command => {
+        await collection.forEach(command => {
 
-            client.api.applications(client.user.id).commands.post({ data: command.data })
+            client.api.applications(client.user.id).guilds(guildIds.dev).commands.post({ data: command.data })
         })
     }
 }
 
 async function removeApplicationCommands(collections) {
 
-    let applicationCommands = await client.api.applications(client.user.id).commands.get()
+    let applicationCommands = await client.api.applications(client.user.id).guilds(guildIds.dev).commands.get()
 
-    applicationCommands.forEach(async applicationCommand => {
+    applicationCommands.forEach(applicationCommand => {
         
         let command
 
@@ -132,7 +135,7 @@ async function removeApplicationCommands(collections) {
         if (!command) {
 
             console.log(`Deleting ${applicationCommand.name}, type ${applicationCommand.type}`)
-            client.api.applications(client.user.id).guilds('795699156399685712').commands(applicationCommand.id).delete()
+            client.api.applications(client.user.id).guilds(guildIds.dev).commands(applicationCommand.id).delete()
         }
     })
 }
