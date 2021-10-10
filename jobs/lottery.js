@@ -60,7 +60,7 @@ module.exports = {
                 .setTitle('This week\'s lottery winner is...')
                 .addField(winner.user.username, oggbot.formatMoney(winner.amount))
                 .setThumbnail(winner.user.avatarURL())
-                .setFooter('Type `/lottery ticket` to enter again for the next lottey!')
+                .setFooter('Type `/lottery ticket` to enter again for the next lottery!')
 
             channel.send({ embeds: [winnerEmbed] })
 
