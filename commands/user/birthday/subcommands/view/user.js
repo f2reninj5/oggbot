@@ -18,7 +18,17 @@ module.exports = {
     },
     async execute(interaction) {
 
-        const userId = interaction.options.getUser('user').id || interaction.user.id
+        let userId
+
+        try {
+
+            userId = interaction.options.getUser('user').id
+
+        } catch {
+
+            userId = interaction.user.id
+        }
+
         const user = await oggbot.fetchUser(userId)
         
         if (!user.birthday) {
