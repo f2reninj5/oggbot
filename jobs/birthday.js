@@ -16,7 +16,7 @@ module.exports = {
     },
     async execute() {
 
-        const announce = new cron.CronJob('0 0 12 * * *', async () => {
+        const announce = new cron.CronJob('0 0 16 * * *', async () => {
 
             async function getBirthdayUsers() {
 
@@ -30,7 +30,7 @@ module.exports = {
 
                 for (id of rows.map(row => row.id)) {
 
-                    let user = oggbot.fetchUser(id)
+                    let user = await oggbot.fetchUser(id)
                     users.push(user)
                 }
 
@@ -46,11 +46,11 @@ module.exports = {
 
             let guild = await client.guilds.fetch('745569983542853643')
             let channels = await guild.channels.fetch()
-            let channel = channels.filter(channel => channel.name == 'announcements')
+            let channel = channels.filter(channel => channel.name == 'announcements').first()
 
             for (user of users) {
 
-                channel.send({ content: `HAPPY BIRTHDAY ${user.username}!` })
+                channel.send({ content: `HAPPY BIRTHDAY! ${user.username} is now ${user.age}!` })
             }
 
         }, { timeZone: 'Europe/London' })

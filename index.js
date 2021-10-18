@@ -1,4 +1,4 @@
-// oggbot s3.0 by f2reninj5
+// oggbot v3.0 by f2reninj5
 
 // imports
 const oggbot = require('./oggbot')

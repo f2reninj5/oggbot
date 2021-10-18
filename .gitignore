@@ -2,3 +2,4 @@ tokens.json
 transactionLogs.txt
 jobs/available/available.json
 commands/money/lottery/winners.json
+.vscode/launch.json

@@ -15,7 +15,7 @@ module.exports = {
         function createNextDrawDate() {
 
             let targetDay = 6 // saturday
-            let now = new Date(1633791600000)
+            let now = new Date()
             let nextDrawDate = new Date(now)
 
             if (now.getHours() < 16) {
