@@ -168,6 +168,11 @@ function queryPool(query) {
     return result
 }
 
+function sanitiseSQLInput(input) {
+
+    return input.replace(/\'/g, `''`).replace(/\\/g, '')
+}
+
 async function moneyTransaction(sender, recipient, amount, note, notify = false, interaction) {
 
     if (amount <= 0) {
@@ -426,7 +431,7 @@ class User extends Discord.User {
 
         if (details.title || details.title == '') {
 
-            details.title = details.title.replace(/\'/g, `''`).replace(/\\/g, '')
+            details.title = sanitiseSQLInput(details.title)
 
             if (details.title.length > 54) {
 
@@ -438,7 +443,7 @@ class User extends Discord.User {
 
         if (details.location || details.location == '') {
 
-            details.location = details.location.replace(/\'/g, `''`).replace(/\\/g, '')
+            details.location = sanitiseSQLInput(details.location)
 
             if (details.location.length > 44) {
 
@@ -450,7 +455,7 @@ class User extends Discord.User {
 
         if (details.description || details.description == '') {
 
-            details.description = details.description.replace(/\'/g, `''`).replace(/\\/g, '')
+            details.description = sanitiseSQLInput(details.description)
 
             if (details.description.length > 216) {
 
