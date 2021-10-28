@@ -1,7 +1,6 @@
 const oggbot = require(`${__root}/oggbot`)
 const Discord = require('discord.js')
 const path = require('path')
-const fs = require('fs')
 
 module.exports = {
 
