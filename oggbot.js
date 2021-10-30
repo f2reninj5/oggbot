@@ -109,7 +109,7 @@ async function loadApplicationCommands(collections) {
 
         await collection.forEach(command => {
 
-            client.api.applications(client.user.id).guilds(guildIds.dev).commands.post({ data: command.data })
+            client.api.applications(client.user.id).commands.post({ data: command.data })
         })
     }
 }
@@ -135,7 +135,7 @@ async function removeApplicationCommands(collections) {
         if (!command) {
 
             console.log(`Deleting ${applicationCommand.name}, type ${applicationCommand.type}`)
-            client.api.applications(client.user.id).guilds(guildIds.dev).commands(applicationCommand.id).delete()
+            client.api.applications(client.user.id).commands(applicationCommand.id).delete()
         }
     })
 }
