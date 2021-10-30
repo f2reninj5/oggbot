@@ -1,5 +1,4 @@
 const { sql } = require('./tokens.json')
-const { guildIds } = require('./config.json')
 const Discord = require('discord.js')
 const mysql = require('mysql')
 const Canvas = require('canvas')
@@ -100,44 +99,82 @@ function startJobs(collection) {
     }
 }
 
-// improve async in application command functions
-// possibly add separate functions for adding commands to or removing commands from a guild
+async function loadApplicationCommands(collections, guildId) {
 
-async function loadApplicationCommands(collections) {
+    if (guildId) {
 
-    for (collection of collections) {
+        for (collection of collections) {
 
-        await collection.forEach(command => {
+            await collection.forEach(async command => {
+    
+                await client.api.applications(client.user.id).guilds(guildId).commands.post({ data: command.data })
+            })
+        }
 
-            client.api.applications(client.user.id).commands.post({ data: command.data })
-        })
+    } else {
+
+        for (collection of collections) {
+
+            await collection.forEach(async command => {
+    
+                await client.api.applications(client.user.id).commands.post({ data: command.data })
+            })
+        }
     }
 }
 
-async function removeApplicationCommands(collections) {
+async function removeApplicationCommands(collections, guildId) {
 
-    let applicationCommands = await client.api.applications(client.user.id).commands.get()
+    if (guildId) {
 
-    applicationCommands.forEach(applicationCommand => {
-        
-        let command
+        let applicationCommands = await client.api.applications(client.user.id).guilds(guildId).commands.get()
 
-        for (i = 0; i < 3; i ++) {
+        applicationCommands.forEach(async applicationCommand => {
+            
+            let command
 
-            command = collections[i].find(command => command.data.name == applicationCommand.name && command.data.type == applicationCommand.type)
+            for (i = 0; i < 3; i ++) {
 
-            if (command) {
+                command = collections[i].find(command => command.data.name == applicationCommand.name && command.data.type == applicationCommand.type)
 
-                break
+                if (command) {
+
+                    break
+                }
             }
-        }
 
-        if (!command) {
+            if (!command) {
 
-            console.log(`Deleting ${applicationCommand.name}, type ${applicationCommand.type}`)
-            client.api.applications(client.user.id).commands(applicationCommand.id).delete()
-        }
-    })
+                console.log(`Deleting ${applicationCommand.name}, type ${applicationCommand.type}`)
+                await client.api.applications(client.user.id).guilds(guildId).commands(applicationCommand.id).delete()
+            }
+        })
+
+    } else {
+
+        let applicationCommands = await client.api.applications(client.user.id).commands.get()
+
+        applicationCommands.forEach(async applicationCommand => {
+            
+            let command
+
+            for (i = 0; i < 3; i ++) {
+
+                command = collections[i].find(command => command.data.name == applicationCommand.name && command.data.type == applicationCommand.type)
+
+                if (command) {
+
+                    break
+                }
+            }
+
+            if (!command) {
+
+                console.log(`Deleting ${applicationCommand.name}, type ${applicationCommand.type}`)
+                await client.api.applications(client.user.id).commands(applicationCommand.id).delete()
+            }
+        })
+    }
 }
 
 function roundMoney(money) {
