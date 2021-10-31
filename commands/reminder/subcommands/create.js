@@ -52,7 +52,7 @@ module.exports = {
         
         try {
 
-            reminder = await user.createReminder(channel.id, timestamp, message)
+            reminder = await user.createReminder((channel ? channel.id : user.id), timestamp, message)
 
             if (global.reminders.length < 1 || reminder.date < global.reminders[0].date) {
 
@@ -68,8 +68,8 @@ module.exports = {
 
         interaction.editReply({ content: `**Scheduled New Reminder**\n`
             + `ID: ${reminder.id}\n`
-            + `Channel: <#${reminder.channelId}>\n`
+            + `Channel: ${(channel ? `<#${reminder.channelId}>` : `__Ensure that your direct messages are open.__`)}\n`
             + `Date: <t:${reminder.date.valueOf() / 1000}:R> at <t:${reminder.date.valueOf() / 1000}:t>\n`
-            + `Message: \`${reminder.message}\`` })
+            + `Message: \`${reminder.message}\`\n` })
     }
 }
