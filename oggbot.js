@@ -224,10 +224,10 @@ async function fetchUpcomingReminders() {
     let rows = await queryPool(`SELECT * FROM reminders WHERE (timestamp) IN (SELECT MIN(timestamp) as timestamp FROM reminders WHERE timestamp > TIMESTAMP(NOW()))`)
     let reminders = []
 
-    for (row of rows) {
+    await rows.forEach(row => {
 
         reminders.push(new Reminder(row.author, row.id, row.channel, row.timestamp, row.message))
-    }
+    })
 
     return reminders
 }
@@ -421,15 +421,15 @@ class User extends Discord.User {
 
         if (rows.length < 1) {
 
-            this.reminders = null
+            this.reminders = []
 
             return
         }
 
-        for (row of rows) {
+        await rows.forEach(row => {
 
             reminders.push(new Reminder(this.id, row.id, row.channel, row.timestamp, row.message))
-        }
+        })
 
         this.reminders = reminders
     }

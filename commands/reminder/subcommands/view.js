@@ -21,7 +21,7 @@ module.exports = {
         let user = await oggbot.fetchUser(interaction.user.id)
         let id = interaction.options.getInteger('id')
 
-        if (id !== null) {
+        if (id) {
 
             let reminder = await user.fetchReminder(id)
 
