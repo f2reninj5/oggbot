@@ -28,7 +28,7 @@ module.exports = {
 
                     let channel = await client.channels.fetch(reminder.channelId)
                     
-                    channel.send({ content: `**<@${reminder.author.id}>'s Reminder**\n\`${reminder.message}\`` }).catch(err => {
+                    channel.send({ content: `**<@${reminder.author.id}>'s Reminder**\n${reminder.message}` }).catch(err => {
 
                         console.log(err)
                     })
