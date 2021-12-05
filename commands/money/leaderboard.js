@@ -83,14 +83,14 @@ module.exports = {
                 // set text settings
                 context.textBaseline = 'middle'
                 context.fillStyle = '#e5e5e5'
-                context.font = '32px calibri'
+                context.font = '32px Oggbot'
                 context.textAlign = 'center'
 
                 // write index number
                 context.fillText(row.index, 32, heightReference + 32)
 
                 // set text settings
-                context.font = '28px calibri'
+                context.font = '28px Oggbot'
                 context.textAlign = 'start'
 
                 // write username and balance

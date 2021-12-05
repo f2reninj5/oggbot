@@ -61,12 +61,12 @@ module.exports = {
 
                 if (i == 0) {
 
-                    context.font = 'bold 32px calibri'
+                    context.font = 'bold 32px Oggbot'
                     context.fillStyle = '#ff9900'
 
                 } else {
 
-                    context.font = '32px calibri'
+                    context.font = '32px Oggbot'
                     context.fillStyle = '#e5e5e5'
                 }
 
