@@ -1,4 +1,5 @@
 const { sql } = require('./tokens.json')
+const { guildIds } = require('./config.json')
 const Discord = require('discord.js')
 const mysql = require('mysql')
 const Canvas = require('canvas')
