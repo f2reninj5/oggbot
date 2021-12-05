@@ -394,18 +394,34 @@ class User extends Discord.User {
 
     async #packBirthday(rows) {
 
+        let now = new Date()
         let birthday
+        let upcomingBirthday
+        let age
 
         if (!rows[0].birthday) {
 
             birthday = null
+            upcomingBirthday = null
+            age = null
 
         } else {
 
             birthday = new Date(rows[0].birthday)
+            age = now.getFullYear() - birthday.getFullYear() - 1
+            upcomingBirthday = new Date(birthday)
+            upcomingBirthday.setFullYear(now.getFullYear())
+
+            if (upcomingBirthday < now) {
+
+                upcomingBirthday.setFullYear(upcomingBirthday.getFullYear() + 1)
+                age += 1
+            }
         }
 
         this.birthday = birthday
+        this.upcomingBirthday = upcomingBirthday
+        this.age = age
     }
 
     async #packDaily(rows) {
