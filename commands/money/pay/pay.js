@@ -68,13 +68,13 @@ module.exports = {
             // set text settings
             context.textBaseline = 'middle'
             context.fillStyle = '#e5e5e5'
-            context.font = '24px calibri'
+            context.font = '24px Oggbot'
             context.textAlign = 'center'
 
             // write usernames
-            context.fillText(sender.username, 106, (canvas.height / 2) + (avatarSize / 2) + 16)
-            context.fillText(recipient.username, 374, (canvas.height / 2) + (avatarSize / 2) + 16)
-            context.font = '36px calibri'
+            context.fillText((sender.username.length > 15 ? sender.username.slice(0, 15) + '-' : sender.username), 106, (canvas.height / 2) + (avatarSize / 2) + 16)
+            context.fillText((recipient.username.length > 15 ? recipient.username.slice(0, 15) + '-' : recipient.username), 374, (canvas.height / 2) + (avatarSize / 2) + 16)
+            context.font = '36px Oggbot'
             context.fillText(oggbot.formatMoney(amount), canvas.width / 2, 16)
 
             // create rounded rectangle clipping mask
@@ -105,7 +105,7 @@ module.exports = {
             return
         }
 
-        if (sender == recipient) {
+        if (sender.id == recipient.id) {
 
             interaction.editReply({ content: 'You cannot pay yourself.' })
 
