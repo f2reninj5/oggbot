@@ -257,6 +257,19 @@ async function fetchUser(id) {
     return user
 }
 
+async function fetchUpcomingReminders() {
+
+    let rows = await queryPool(`SELECT * FROM reminders WHERE (timestamp) IN (SELECT MIN(timestamp) as timestamp FROM reminders WHERE timestamp > TIMESTAMP(NOW()))`)
+    let reminders = []
+
+    await rows.forEach(row => {
+
+        reminders.push(new Reminder(row.author, row.id, row.channel, row.timestamp, row.message))
+    })
+
+    return reminders
+}
+
 async function fetchHomeGuild() {
 
     let guild = await client.guilds.fetch(guildIds.home)
@@ -355,6 +368,25 @@ class User extends Discord.User {
         this.styles = styles
     }
 
+    async fetchReminders() {
+
+        let rows = await queryPool(`SELECT id, channel, timestamp, message FROM reminders WHERE author = '${this.id}' AND timestamp > TIMESTAMP(NOW())`)
+
+        await this.#packReminders(rows)
+    }
+
+    async fetchReminder(id) {
+
+        let rows = await queryPool(`SELECT id, channel, timestamp, message FROM reminders WHERE author = '${this.id}' AND id = ${id}`)
+
+        if (rows.length < 1) {
+
+            return null
+        }
+
+        return new Reminder(this.id, rows[0].id, rows[0].channel, rows[0].timestamp, rows[0].message)
+    }
+
     async #packBalance(rows) {
 
         this.balance = rows[0].balance
@@ -362,34 +394,18 @@ class User extends Discord.User {
 
     async #packBirthday(rows) {
 
-        let now = new Date()
         let birthday
-        let upcomingBirthday
-        let age
 
         if (!rows[0].birthday) {
 
             birthday = null
-            upcomingBirthday = null
-            age = null
 
         } else {
 
             birthday = new Date(rows[0].birthday)
-            age = now.getFullYear() - birthday.getFullYear() - 1
-            upcomingBirthday = new Date(birthday)
-            upcomingBirthday.setFullYear(now.getFullYear())
-
-            if (upcomingBirthday < now) {
-
-                upcomingBirthday.setFullYear(upcomingBirthday.getFullYear() + 1)
-                age += 1
-            }
         }
 
         this.birthday = birthday
-        this.upcomingBirthday = upcomingBirthday
-        this.age = age
     }
 
     async #packDaily(rows) {
@@ -435,6 +451,25 @@ class User extends Discord.User {
         }
 
         this.lottery = lottery
+    }
+
+    async #packReminders(rows) {
+
+        let reminders = []
+
+        if (rows.length < 1) {
+
+            this.reminders = []
+
+            return
+        }
+
+        await rows.forEach(row => {
+
+            reminders.push(new Reminder(this.id, row.id, row.channel, row.timestamp, row.message))
+        })
+
+        this.reminders = reminders
     }
 
     async setBirthday(date) {
@@ -529,13 +564,83 @@ class User extends Discord.User {
 
         queryPool(`UPDATE styles SET selected = ${sqlStyle} WHERE id = '${this.id}'`)
     }
+
+    async createReminder(channelId, timestamp, message) {
+
+        let sqlTimestamp
+        let now = new Date()
+
+        if (timestamp < now) {
+
+            throw 'the timestamp is in the past'
+        }
+
+        message = sanitiseSQLInput(message)
+
+        if (message.length > 216) {
+
+            throw 'the message is too long'
+        }
+
+        sqlTimestamp = `${timestamp.getFullYear()}-${timestamp.getMonth() + 1}-${timestamp.getDate()} ${timestamp.getHours()}:${timestamp.getMinutes()}:${timestamp.getSeconds()}`
+
+        let id = (await queryPool(`SELECT MAX(id) + 1 as id FROM reminders WHERE author = '${this.id}'`))[0].id || 0
+
+        await queryPool(`INSERT INTO reminders (author, id, channel, timestamp, message) VALUES ('${this.id}', ${id}, '${channelId}', '${sqlTimestamp}', '${message}')`).catch(err => {
+
+            if (err.code == 'ER_DUP_ENTRY' && err.message.includes('uniquetimestamp')) {
+
+                throw 'you cannot create a duplicate reminder'
+            }
+
+            console.log(err)
+
+            throw 'something went wrong when querying the database'
+        })
+
+        return new Reminder(this.id, id, channelId, sqlTimestamp, message)
+    }
+
+    async deleteReminder(id) {
+
+        let result = await queryPool(`DELETE FROM reminders WHERE author = '${this.id}' AND id = ${id}`).catch(err => {
+
+            console.log(err)
+
+            throw 'something went wrong when querying the database'
+        })
+
+        if (result.affectedRows < 1) {
+
+            throw `a reminder of ID ${id} does not exist`
+        }
+    }
+}
+
+class Reminder {
+
+    constructor(authorId, id, channelId, timestamp, message) {
+
+        this.authorId = authorId
+        this.id = id,
+        this.channelId = channelId
+        this.date = new Date(timestamp)
+        this.message = message
+    }
+
+    async fetchAuthor() {
+
+        this.author = await fetchUser(this.authorId)
+    }
 }
 
 module.exports = {
 
     User: User,
+    Reminder: Reminder,
 
     fetchUser: fetchUser,
+    fetchUpcomingReminders: fetchUpcomingReminders,
     fetchHomeGuild: fetchHomeGuild,
     fetchDevGuild: fetchDevGuild,
     loadCommands: loadCommands,
