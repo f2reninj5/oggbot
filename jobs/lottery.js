@@ -1,8 +1,6 @@
 const oggbot = require(`${__root}/oggbot`)
 const Discord = require('discord.js')
 const cron = require('cron')
-const path = require('path')
-const fs = require('fs')
 
 module.exports = {
 
@@ -28,13 +26,10 @@ module.exports = {
 
                 let id = (await oggbot.queryPool(`SELECT id FROM lottery ORDER BY RAND() LIMIT 1`))[0].id
                 let amount = (await oggbot.queryPool(`SELECT SUM(amount) as amount FROM lottery`))[0].amount
-                let timestamp = new Date()
-                timestamp.setHours(16, 0, 0, 0)
                 let winner = {
                     
                     user: await oggbot.fetchUser(id),
-                    amount: amount,
-                    timestamp: timestamp.valueOf()
+                    amount: amount
                 }
 
                 return winner
@@ -42,17 +37,8 @@ module.exports = {
 
             let winner = await drawWinner()
 
-            let winners = await JSON.parse(fs.readFileSync(path.resolve(__dirname, `${__root}/commands/money/lottery/winners.json`)))
-            winners.pop()
-            winners.unshift({
-            
-                id: winner.user.id,
-                amount: winner.amount,
-                timestamp: winner.timestamp
-            })
+            oggbot.queryPool(`INSERT INTO lottery_winners VALUES ('${winner.user.id}', ${winner.amount}, DATE_FORMAT(CURRENT_TIMESTAMP(), '%Y-%m-%d %H:00:00'))`)
 
-            fs.writeFileSync(path.resolve(__dirname, `${__root}/commands/money/lottery/winners.json`), JSON.stringify(winners))
-            
             await oggbot.moneyTransaction(client.user, winner.user, winner.amount, 'lottery winner')
             await oggbot.queryPool(`DELETE FROM lottery`)
 
