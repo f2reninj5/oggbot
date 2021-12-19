@@ -370,14 +370,14 @@ class User extends Discord.User {
 
     async fetchReminders() {
 
-        let rows = await queryPool(`SELECT id, channel, timestamp, message FROM reminders WHERE author = '${this.id}' AND timestamp > TIMESTAMP(NOW())`)
+        let rows = await queryPool(`SELECT id, channel, timestamp, message FROM reminders WHERE author_id = '${this.id}' AND timestamp > TIMESTAMP(NOW())`)
 
         await this.#packReminders(rows)
     }
 
     async fetchReminder(id) {
 
-        let rows = await queryPool(`SELECT id, channel, timestamp, message FROM reminders WHERE author = '${this.id}' AND id = ${id}`)
+        let rows = await queryPool(`SELECT id, channel, timestamp, message FROM reminders WHERE author_id = '${this.id}' AND id = ${id}`)
 
         if (rows.length < 1) {
 
@@ -600,9 +600,9 @@ class User extends Discord.User {
 
         sqlTimestamp = `${timestamp.getFullYear()}-${timestamp.getMonth() + 1}-${timestamp.getDate()} ${timestamp.getHours()}:${timestamp.getMinutes()}:${timestamp.getSeconds()}`
 
-        let id = (await queryPool(`SELECT MAX(id) + 1 as id FROM reminders WHERE author = '${this.id}'`))[0].id || 0
+        let id = (await queryPool(`SELECT MAX(id) + 1 as id FROM reminders WHERE author_id = '${this.id}'`))[0].id || 0
 
-        await queryPool(`INSERT INTO reminders (author, id, channel, timestamp, message) VALUES ('${this.id}', ${id}, '${channelId}', '${sqlTimestamp}', '${message}')`).catch(err => {
+        await queryPool(`INSERT INTO reminders (author_id, id, channel, timestamp, message) VALUES ('${this.id}', ${id}, '${channelId}', '${sqlTimestamp}', '${message}')`).catch(err => {
 
             if (err.code == 'ER_DUP_ENTRY' && err.message.includes('uniquetimestamp')) {
 
@@ -619,7 +619,7 @@ class User extends Discord.User {
 
     async deleteReminder(id) {
 
-        let result = await queryPool(`DELETE FROM reminders WHERE author = '${this.id}' AND id = ${id}`).catch(err => {
+        let result = await queryPool(`DELETE FROM reminders WHERE author_id = '${this.id}' AND id = ${id}`).catch(err => {
 
             console.log(err)
 
