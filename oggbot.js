@@ -1,7 +1,7 @@
 const { sql } = require('./tokens.json')
 const { guildIds } = require('./config.json')
 const Discord = require('discord.js')
-const mysql = require('mysql')
+const mysql = require('mysql2')
 const Canvas = require('canvas')
 const path = require('path')
 const fs = require('fs')
@@ -185,7 +185,7 @@ function roundMoney(money) {
 
 function formatMoney(money) {
 
-    return `Ø${money.toLocaleString()}`
+    return `Ø${parseFloat(money).toLocaleString()}`
 }
 
 function queryPool(query) {
