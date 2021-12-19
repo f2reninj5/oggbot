@@ -24,7 +24,7 @@ module.exports = {
 
             async function drawWinner() {
 
-                let id = (await oggbot.queryPool(`SELECT id FROM lottery ORDER BY RAND() LIMIT 1`))[0].id
+                let id = (await oggbot.queryPool(`SELECT user_id FROM lottery ORDER BY RAND() LIMIT 1`))[0].id
                 let amount = (await oggbot.queryPool(`SELECT SUM(amount) as amount FROM lottery`))[0].amount
                 let winner = {
                     

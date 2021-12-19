@@ -324,7 +324,7 @@ class User extends Discord.User {
 
     async #fetchLotteryData() {
 
-        let rows = await queryPool(`SELECT id, amount FROM lottery WHERE id = '${this.id}'`)
+        let rows = await queryPool(`SELECT user_id, amount FROM lottery WHERE id = '${this.id}'`)
 
         await this.#packLottery(rows)
     }
