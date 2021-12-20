@@ -30,7 +30,7 @@ module.exports = {
         let total = lotteryValues.ticketPrice + oggbot.roundMoney(lotteryValues.ticketPrice * lotteryValues.bonusRatio)
 
         oggbot.moneyTransaction(user, client.user, lotteryValues.ticketPrice, 'lottery ticket')
-        oggbot.queryPool(`INSERT INTO lottery (id, amount) VALUES ('${user.id}', ${total})`)
+        oggbot.queryPool(`INSERT INTO lottery (user_id, amount) VALUES ('${user.id}', ${total})`)
 
         interaction.editReply(`Purchased lottery ticket for ${oggbot.formatMoney(lotteryValues.ticketPrice)}`)
     }
