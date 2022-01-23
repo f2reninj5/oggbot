@@ -17,14 +17,14 @@ module.exports = {
     },
     async execute() {
 
-        const draw = new cron.CronJob('0 0 16 * * 6', async () => {
+        const draw = new cron.CronJob('0 * * * * *', async () => {
 
             const guild = await client.guilds.fetch('745569983542853643')
             const channel = (await guild.channels.fetch()).filter(channel => channel.name == 'announcements').first()
 
             async function drawWinner() {
 
-                let id = (await oggbot.queryPool(`SELECT user_id FROM lottery ORDER BY RAND() LIMIT 1`))[0].id
+                let id = (await oggbot.queryPool(`SELECT user_id FROM lottery ORDER BY RAND() LIMIT 1`))[0].user_id
                 let amount = (await oggbot.queryPool(`SELECT SUM(amount) as amount FROM lottery`))[0].amount
                 let winner = {
                     
