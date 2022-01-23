@@ -17,7 +17,7 @@ module.exports = {
     },
     async execute() {
 
-        const draw = new cron.CronJob('0 * * * * *', async () => {
+        const draw = new cron.CronJob('0 0 16 * * 6', async () => {
 
             const guild = await client.guilds.fetch('745569983542853643')
             const channel = (await guild.channels.fetch()).filter(channel => channel.name == 'announcements').first()
