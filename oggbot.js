@@ -230,7 +230,17 @@ async function moneyTransaction(sender, recipient, amount, note, notify = false,
         throw 'invalid recipient'
     }
 
-    await queryPool(`UPDATE users SET balance = CASE WHEN id = :senderId THEN balance - :amount WHEN id = :recipientId THEN balance + :amount END WHERE id IN (:senderId, :recipientId)`, { senderId: sender.id, recipientId: recipient.id, amount: amount })
+    if (sender.balance < amount) {
+
+        throw 'sender has insufficient funds'
+    }
+
+    await queryPool(`UPDATE users SET balance = CASE WHEN id = :senderId THEN balance - :amount WHEN id = :recipientId THEN balance + :amount END WHERE id IN (:senderId, :recipientId)`, { senderId: sender.id, recipientId: recipient.id, amount: amount }).catch(err => {
+
+        console.log(err)
+
+        throw 'something went wrong when querying the database'
+    })
 
     let log = `[${new Date().toLocaleString()}] ${sender.username}#${sender.discriminator} (${sender.id}) | ${recipient.username}#${recipient.discriminator} (${recipient.id}) > ${amount.toLocaleString()} | ${note}`
     fs.appendFileSync(path.resolve(__dirname, './transactionLogs.txt'), ('\n' + log))
