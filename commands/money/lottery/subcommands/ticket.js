@@ -29,8 +29,22 @@ module.exports = {
 
         let total = lotteryValues.ticketPrice + oggbot.roundMoney(lotteryValues.ticketPrice * lotteryValues.bonusRatio)
 
-        oggbot.moneyTransaction(user, client.user, lotteryValues.ticketPrice, 'lottery ticket')
-        oggbot.queryPool(`INSERT INTO lottery (user_id, amount) VALUES ('${user.id}', ${total})`)
+        try {
+
+            oggbot.moneyTransaction(user, client.user, lotteryValues.ticketPrice, 'lottery ticket')
+            oggbot.queryPool(`INSERT INTO lottery (user_id, amount) VALUES ('${user.id}', ${total})`).catch(err => {
+
+                console.log(err)
+
+                throw 'something went wrong when querying the database'
+            })
+
+        } catch (err) {
+
+            interaction.editReply({ content: `Failed to purchase ticket because \`${err}\`.` })
+
+            return
+        }
 
         interaction.editReply(`Purchased lottery ticket for ${oggbot.formatMoney(lotteryValues.ticketPrice)}`)
     }
