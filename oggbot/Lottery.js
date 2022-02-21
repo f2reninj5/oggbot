@@ -26,7 +26,7 @@ module.exports = class Lottery {
 
     static async hasTicket(user) {
 
-        let rows = await oggbot.queryPool('SELECT * FROM lottery WHERE id = ?', [user.id]).catch(err => {
+        let rows = await oggbot.queryPool('SELECT * FROM lottery WHERE user_id = ?', [user.id]).catch(err => {
 
             console.log(err)
 
@@ -124,6 +124,9 @@ module.exports = class Lottery {
         }
 
         await Bank.transferMoney(client.user, winner.user, winner.winnings, 'lottery winner')
+        
+        await oggbot.queryPool(`INSERT INTO lottery_winners (user_id, timestamp, amount) VALUES (?, DATE_FORMAT(TIMESTAMP(), '%Y-%m-%d %H:00:00'), ?)`, [winner.user.id, winner.winnings])
+
         await oggbot.queryPool('DELETE FROM lottery').catch(err => {
 
             console.log(err)

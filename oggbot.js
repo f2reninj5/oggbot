@@ -190,11 +190,11 @@ function formatMoney(money) {
     return `Ø${parseFloat(money).toLocaleString()}`
 }
 
-function queryPool(query) {
+function queryPool(query, placeholders) {
 
     let result = new Promise((resolve, reject) => {
 
-        pool.query(query, (err, rows) => {
+        pool.query(query, placeholders, (err, rows) => {
     
             if (err) {
     

@@ -27,15 +27,19 @@ async function addUserToDatabase(user) {
 // on bot start
 client.on('ready', async () => {
 
-    oggbot.loadCommands([client.chatCommands, client.userCommands, client.messageCommands], './commands')
-    console.log('Commands loaded')
-    oggbot.loadJobs(client.jobs, './jobs')
-    console.log('Jobs loaded')
-    oggbot.startJobs(client.jobs)
-    console.log('Jobs started')
-    // await oggbot.loadApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
-    // await oggbot.removeApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
-    oggbot.registerFonts('UbuntuMono')
+    // oggbot.loadCommands([client.chatCommands, client.userCommands, client.messageCommands], './commands')
+    // console.log('Commands loaded')
+    // oggbot.loadJobs(client.jobs, './jobs')
+    // console.log('Jobs loaded')
+    // oggbot.startJobs(client.jobs)
+    // console.log('Jobs started')
+    // // await oggbot.loadApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
+    // // await oggbot.removeApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
+    // oggbot.registerFonts('UbuntuMono')
+
+    const { generateStreak } = require('./oggbot/Claims')
+
+    console.log(generateStreak(0, 5))
 
     console.log(`Version: ${version}`)
 })

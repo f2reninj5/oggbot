@@ -26,12 +26,13 @@ module.exports = class Bank {
             throw 'user could not be found'
         }
 
-        return rows[0].balance
+        return parseFloat(rows[0].balance)
     }
 
     static async transferMoney(sender, recipient, amount, reason = 'unspecified') {
 
         sender.balance = this.fetchBalance(sender)
+        recipient.balance = this.fetchBalance(recipient) // ensures that recipient exists in database
 
         if (amount <= 0) {
 
