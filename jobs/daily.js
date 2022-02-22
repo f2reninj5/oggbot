@@ -1,4 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
+const { Claims } = require(`${__root}/oggbot/index`)
 const cron = require('cron')
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
 
             {
                 name: 'reset',
-                description: 'Updates the daily column in database to 0.'
+                description: 'Resets daily claims and streaks.'
             }
         ]
     },
@@ -18,8 +18,14 @@ module.exports = {
 
         const reset = new cron.CronJob('0 0 0 * * *', async () => {
 
-            await oggbot.queryPool(`UPDATE users SET dailystreak = 0 WHERE daily = 0`)
-            oggbot.queryPool(`UPDATE users SET daily = 0`)
+            try {
+
+                await Claims.progressDailies()
+
+            } catch (err) {
+
+                console.log(err)
+            }
 
         }, { timeZone: 'Europe/London' })
 

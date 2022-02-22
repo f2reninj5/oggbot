@@ -1,4 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
+const { Birthdays, Database } = require(`${__root}/oggbot/index`)
 const Discord = require('discord.js')
 const Canvas = require('canvas')
 
@@ -15,7 +15,7 @@ module.exports = {
 
         async function getUsersByBirthday() {
 
-            let allBirthdays = await oggbot.queryPool(`SELECT id FROM users WHERE birthday IS NOT NULL ORDER BY MONTH(birthday), DAY(birthday) ASC`)
+            let allBirthdays = await Database.query(`SELECT id FROM users WHERE birthday IS NOT NULL ORDER BY MONTH(birthday), DAY(birthday) ASC`)
             allBirthdays = allBirthdays.map(row => row.id)
 
             if (allBirthdays.length < 1) {
@@ -23,7 +23,7 @@ module.exports = {
                 return null
             }
 
-            let upcomingBirthdays = await oggbot.queryPool(`SELECT id FROM users WHERE (MONTH(birthday) >= MONTH(NOW()) AND DAY(birthday) >= DAY(NOW())) OR MONTH(birthday) > MONTH(NOW()) ORDER BY MONTH(birthday), DAY(birthday) ASC`)
+            let upcomingBirthdays = await Database.query(`SELECT id FROM users WHERE (MONTH(birthday) >= MONTH(NOW()) AND DAY(birthday) >= DAY(NOW())) OR MONTH(birthday) > MONTH(NOW()) ORDER BY MONTH(birthday), DAY(birthday) ASC`)
             upcomingBirthdays = upcomingBirthdays.map(row => row.id)
 
             let passedBirthdays = allBirthdays.splice(0, allBirthdays.length - upcomingBirthdays.length)
@@ -32,7 +32,7 @@ module.exports = {
 
             for (id of userIds) {
 
-                users.push(await oggbot.fetchUser(id))
+                users.push(await client.users.fetch(id))
             }
 
             return users
@@ -72,7 +72,8 @@ module.exports = {
 
                 // load avatar image
                 let avatar = await Canvas.loadImage(users[i].displayAvatarURL({ format: 'jpg', size: 64 }))
-                
+                users[i].birthday = await Birthdays.fetchBirthday(users[i])
+
                 // draw avatar image
                 context.drawImage(avatar, 0, heightReference, 64, 64)
 

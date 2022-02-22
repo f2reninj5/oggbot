@@ -113,8 +113,8 @@ module.exports = {
                         type: 1
                     },
                     {
-                        name: 'upcoming',
-                        description: 'View nearest upcoming birthdays.',
+                        name: 'nearest',
+                        description: 'View nearest nearest birthdays.',
                         type: 1
                     },
                     {

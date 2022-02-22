@@ -1,4 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
+const { Bank, Lottery } = require(`${__root}/oggbot/index`)
 const Discord = require('discord.js')
 
 module.exports = {
@@ -11,35 +11,24 @@ module.exports = {
     },
     async execute(interaction) {
 
-        async function fetchWinners() {
+        try {
 
-            let rows = await oggbot.queryPool('SELECT user_id, amount, timestamp FROM lottery_winners ORDER BY timestamp DESC LIMIT 6')
-            let winners = []
+            let winners = await Lottery.fetchWinners()
 
-            for (row of rows) {
+            let winnersEmbed = new Discord.MessageEmbed()
+                .setTitle('Lottery Winners')
 
-                winners.push({
+            for (winner of winners) {
 
-                    user: await oggbot.fetchUser(row.user_id),
-                    amount: row.amount,
-                    timestamp: new Date(row.timestamp)
-                })
+                winnersEmbed
+                    .addField(winner.timestamp.toLocaleDateString(), `**${winner.user.username}** - ${Bank.format(winner.amount)}`)
             }
 
-            return winners
+            await interaction.editReply({ embeds: [winnersEmbed] })
+
+        } catch (err) {
+
+            await interaction.editReply({ content: `Failed to get winners because \`${err}\`.` })
         }
-    
-        let winners = await fetchWinners()
-
-        const winnersEmbed = new Discord.MessageEmbed()
-            .setTitle('Lottery Winners')
-
-        for (winner of winners) {
-
-            winnersEmbed
-                .addField(winner.timestamp.toLocaleDateString(), `**${winner.user.username}** - ${oggbot.formatMoney(winner.amount)}`)
-        }
-
-        interaction.editReply({ embeds: [winnersEmbed] })
     }
 }

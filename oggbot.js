@@ -1,20 +1,18 @@
-const { sql } = require('./tokens.json')
+// const { sql } = require('./tokens.json')
 const { guildIds } = require('./config.json')
 const Discord = require('discord.js')
-const mysql = require('mysql2')
+// const mysql = require('mysql2')
 const Canvas = require('canvas')
 const path = require('path')
 const fs = require('fs')
-const pool = mysql.createPool({
+// const pool = mysql.createPool({
     
-    host: sql.host,
-    user: sql.user,
-    password: sql.password,
-    database: sql.database,
-    charset : 'utf8mb4'
-})
-
-pool.config.namedPlaceholders = true
+//     host: sql.host,
+//     user: sql.user,
+//     password: sql.password,
+//     database: sql.database,
+//     charset : 'utf8mb4'
+// })
 
 function loadCommands(collections, directory) {
 
@@ -180,93 +178,93 @@ async function removeApplicationCommands(collections, guildId) {
     }
 }
 
-function roundMoney(money) {
+// function roundMoney(money) {
 
-    return parseFloat(parseFloat(money).toFixed(2))
-}
+//     return parseFloat(parseFloat(money).toFixed(2))
+// }
 
-function formatMoney(money) {
+// function formatMoney(money) {
 
-    return `Ø${parseFloat(money).toLocaleString()}`
-}
+//     return `Ø${parseFloat(money).toLocaleString()}`
+// }
 
-function queryPool(query, placeholders) {
+// function queryPool(query, placeholders) {
 
-    let result = new Promise((resolve, reject) => {
+//     let result = new Promise((resolve, reject) => {
 
-        pool.query(query, placeholders, (err, rows) => {
+//         pool.query(query, placeholders, (err, rows) => {
     
-            if (err) {
+//             if (err) {
     
-                return reject(err)
-            }
+//                 return reject(err)
+//             }
     
-            return resolve(rows)
-        })
-    })
+//             return resolve(rows)
+//         })
+//     })
 
-    return result
-}
+//     return result
+// }
 
-function sanitiseSQLInput(input) {
+// function sanitiseSQLInput(input) {
 
-    return input.replace(/\'/g, `''`).replace(/\\/g, '')
-}
+//     return input.replace(/\'/g, `''`).replace(/\\/g, '')
+// }
 
-async function moneyTransaction(sender, recipient, amount, note, notify = false, interaction) {
+// async function moneyTransaction(sender, recipient, amount, note, notify = false, interaction) {
 
-    if (amount <= 0) {
+//     if (amount <= 0) {
 
-        throw 'amount must be greater than 0'
-    }
+//         throw 'amount must be greater than 0'
+//     }
 
-    if (!sender.id) {
+//     if (!sender.id) {
 
-        throw 'invalid sender'
-    }
+//         throw 'invalid sender'
+//     }
 
-    if (!recipient.id) {
+//     if (!recipient.id) {
 
-        throw 'invalid recipient'
-    }
+//         throw 'invalid recipient'
+//     }
 
-    if (sender.balance < amount) {
+//     if (sender.balance < amount) {
 
-        throw 'sender has insufficient funds'
-    }
+//         throw 'sender has insufficient funds'
+//     }
 
-    await queryPool(`UPDATE users SET balance = CASE WHEN id = :senderId THEN balance - :amount WHEN id = :recipientId THEN balance + :amount END WHERE id IN (:senderId, :recipientId)`, { senderId: sender.id, recipientId: recipient.id, amount: amount }).catch(err => {
+//     await queryPool(`UPDATE users SET balance = CASE WHEN id = :senderId THEN balance - :amount WHEN id = :recipientId THEN balance + :amount END WHERE id IN (:senderId, :recipientId)`, { senderId: sender.id, recipientId: recipient.id, amount: amount }).catch(err => {
 
-        console.log(err)
+//         console.log(err)
 
-        throw 'something went wrong when querying the database'
-    })
+//         throw 'something went wrong when querying the database'
+//     })
 
-    let log = `[${new Date().toLocaleString()}] ${sender.username}#${sender.discriminator} (${sender.id}) | ${recipient.username}#${recipient.discriminator} (${recipient.id}) > ${amount.toLocaleString()} | ${note}`
-    fs.appendFileSync(path.resolve(__dirname, './transactionLogs.txt'), ('\n' + log))
+//     let log = `[${new Date().toLocaleString()}] ${sender.username}#${sender.discriminator} (${sender.id}) | ${recipient.username}#${recipient.discriminator} (${recipient.id}) > ${amount.toLocaleString()} | ${note}`
+//     fs.appendFileSync(path.resolve(__dirname, './transactionLogs.txt'), ('\n' + log))
 
-    if (notify) {
+//     if (notify) {
 
-        try {
+//         try {
 
-            await recipient.send({ content: `Incoming payment:\n\`${sender.username}#${sender.discriminator} | ${formatMoney(amount)}\`` })
+//             await recipient.send({ content: `Incoming payment:\n\`${sender.username}#${sender.discriminator} | ${formatMoney(amount)}\`` })
 
-        } catch {
+//         } catch {
 
-            interaction.followUp({ content: 'Unable to DM recipient.', ephemeral: true })
-        }
-    }
-}
+//             interaction.followUp({ content: 'Unable to DM recipient.', ephemeral: true })
+//         }
+//     }
+// }
 
-async function fetchUser(id) {
+// async function fetchUser(id) {
 
-    let user = await client.users.fetch(id)
-    user = new User(user)
+//     let user = await client.users.fetch(id)
+//     user = new User(user)
 
-    await user.initialise()
+//     await user.initialise()
 
-    return user
-}
+//     return user
+// }
 
 async function fetchUpcomingReminders() {
 
@@ -281,7 +279,7 @@ async function fetchUpcomingReminders() {
     return reminders
 }
 
-async function fetchHomeGuild() {
+async function fetchHomeGuild() { // lottery job
 
     let guild = await client.guilds.fetch(guildIds.home)
 
@@ -666,7 +664,7 @@ module.exports = {
     User: User,
     Reminder: Reminder,
 
-    fetchUser: fetchUser,
+    // fetchUser: fetchUser,
     fetchUpcomingReminders: fetchUpcomingReminders,
     fetchHomeGuild: fetchHomeGuild,
     fetchDevGuild: fetchDevGuild,
@@ -676,9 +674,9 @@ module.exports = {
     loadApplicationCommands: loadApplicationCommands,
     removeApplicationCommands: removeApplicationCommands,
     startJobs: startJobs,
-    roundMoney: roundMoney,
-    formatMoney: formatMoney,
-    queryPool: queryPool,
-    moneyTransaction: moneyTransaction,
+    // roundMoney: roundMoney,
+    // formatMoney: formatMoney,
+    // queryPool: queryPool,
+    // moneyTransaction: moneyTransaction,
     registerFonts: registerFonts
 }

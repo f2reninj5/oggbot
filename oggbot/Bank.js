@@ -1,4 +1,6 @@
 const oggbot = require(`${__root}/oggbot`)
+const Database = require('./Database')
+const fs = require('fs')
 
 module.exports = class Bank {
 
@@ -14,7 +16,7 @@ module.exports = class Bank {
 
     static async fetchBalance(user) {
 
-        let rows = await oggbot.queryPool('SELECT balance FROM users WHERE id = ?', [user.id]).catch(err => {
+        let rows = await Database.query('SELECT balance FROM users WHERE id = ?', [user.id]).catch(err => {
 
             console.log(err)
 
@@ -31,8 +33,9 @@ module.exports = class Bank {
 
     static async transferMoney(sender, recipient, amount, reason = 'unspecified') {
 
-        sender.balance = this.fetchBalance(sender)
-        recipient.balance = this.fetchBalance(recipient) // ensures that recipient exists in database
+        sender.balance = await this.fetchBalance(sender)
+        recipient.balance = await this.fetchBalance(recipient) // ensures that recipient exists in database
+        amount = this.round(amount)
 
         if (amount <= 0) {
 
@@ -54,14 +57,21 @@ module.exports = class Bank {
             throw 'sender has insufficient funds'
         }
     
-        await oggbot.queryPool('UPDATE users SET balance = CASE WHEN id = :senderId THEN balance - :amount WHEN id = :recipientId THEN balance + :amount END WHERE id IN (:senderId, :recipientId)', { senderId: sender.id, recipientId: recipient.id, amount: amount }).catch(err => {
+        await Database.query('UPDATE users SET balance = CASE WHEN id = ? THEN balance - ? WHEN id = ? THEN balance + ? END WHERE id IN (?, ?)', [sender.id, amount, recipient.id, amount, sender.id, recipient.id]).catch(err => {
     
             console.log(err)
     
             throw 'something went wrong when querying the database'
         })
     
+        this.logTransaction(sender, recipient, amount, reason)
+
+        return { sender: sender, recipient: recipient, amount: amount }
+    }
+
+    static logTransaction(sender, recipient, amount, reason) {
+
         let log = `[${new Date().toLocaleString()}] ${sender.username}#${sender.discriminator} (${sender.id}) | ${recipient.username}#${recipient.discriminator} (${recipient.id}) > ${amount.toLocaleString()} | ${reason}`
-        fs.appendFileSync(path.resolve(__root, '/logs/transactionLogs.txt'), ('\n' + log))
+        fs.appendFileSync(`${__root}/logs/transactions.txt`, ('\n' + log))
     }
 }

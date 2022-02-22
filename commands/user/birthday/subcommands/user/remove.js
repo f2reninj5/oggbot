@@ -1,4 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
+const { Birthdays } = require(`${__root}/oggbot/index`)
 
 module.exports = {
 
@@ -11,17 +11,17 @@ module.exports = {
     },
     async execute(interaction) {
 
-        const user = await oggbot.fetchUser(interaction.user.id)
+        try {
 
-        if (!user.birthday) {
+            let user = interaction.user
 
-            interaction.editReply({ content: 'You already had no set birthday.' })
+            await Birthdays.setBirthday(user, null)
 
-            return
+            await interaction.editReply({ content: `Removed birthday.` })
+        
+        } catch (err) {
+
+            await interaction.editReply({ content: `Failed to remove birthday because \`${err}\`.` })
         }
-
-        user.setBirthday(null)
-
-        interaction.editReply({ content: 'Birthday removed.' })
     }
 }

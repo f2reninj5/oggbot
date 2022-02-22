@@ -1,6 +1,5 @@
-
-const Bank = require('./index')
-const oggbot = require(`${__root}/oggbot`)
+const Bank = require('./Bank')
+const Database = require('./Database')
 const { lotteryValues } = require(`${__root}/config.json`)
 
 module.exports = class Lottery {
@@ -16,17 +15,19 @@ module.exports = class Lottery {
     
         await Bank.transferMoney(user, client.user, lotteryValues.ticketPrice, 'lottery ticket')
 
-        oggbot.queryPool('INSERT INTO lottery (user_id, amount) VALUES (?, ?)', [user.id, value]).catch(err => {
+        Database.query('INSERT INTO lottery (user_id, amount) VALUES (?, ?)', [user.id, value]).catch(err => {
 
             console.log(err)
 
             throw 'something went wrong when querying the database'
         })
+
+        return { user: user, price: lotteryValues.ticketPrice, value: value }
     }
 
     static async hasTicket(user) {
 
-        let rows = await oggbot.queryPool('SELECT * FROM lottery WHERE user_id = ?', [user.id]).catch(err => {
+        let rows = await Database.query('SELECT * FROM lottery WHERE user_id = ?', [user.id]).catch(err => {
 
             console.log(err)
 
@@ -60,7 +61,7 @@ module.exports = class Lottery {
 
     static async fetchStats() {
 
-        let rows = await oggbot.queryPool('SELECT SUM(amount) AS potValue, COUNT(*) AS entryCount FROM lottery').catch(err => {
+        let rows = await Database.query('SELECT SUM(amount) AS potValue, COUNT(*) AS entryCount FROM lottery').catch(err => {
 
             console.log(err)
 
@@ -69,8 +70,8 @@ module.exports = class Lottery {
 
         let stats = {
 
-            potValue: rows[0].potValue || 0,
-            entryCount: rows[0].entryCount || 0,
+            potValue: parseFloat(rows[0].potValue) || 0,
+            entryCount: parseInt(rows[0].entryCount) || 0,
             ticket: {
 
                 price: lotteryValues.ticketPrice,
@@ -82,9 +83,9 @@ module.exports = class Lottery {
         return stats
     }
 
-    static async fetchWinners() {
+    static async fetchWinners() { // return ids rather than users
 
-        let rows = await oggbot.queryPool('SELECT user_id, timestamp, amount FROM lottery_winners ORDER BY timestamp DESC LIMIT 6').catch(err => {
+        let rows = await Database.query('SELECT user_id, timestamp, amount FROM lottery_winners ORDER BY timestamp DESC LIMIT 6').catch(err => {
 
             console.log(err)
 
@@ -93,13 +94,13 @@ module.exports = class Lottery {
 
         let winners = []
 
-        for (row of rows) {
+        for (let row of rows) {
 
             winners.push({
 
                 user: await client.users.fetch(row.user_id),
                 timestamp: new Date(row.timestamp),
-                amount: row.amount
+                amount: parseFloat(row.amount)
             })
         }
 
@@ -108,7 +109,7 @@ module.exports = class Lottery {
     
     static async drawWinner() {
 
-        let rows = await oggbot.queryPool('SELECT user_id FROM lottery ORDER BY RAND() LIMIT 1').catch(err => {
+        let rows = await Database.query('SELECT user_id FROM lottery ORDER BY RAND() LIMIT 1').catch(err => {
 
             console.log(err)
 
@@ -125,9 +126,9 @@ module.exports = class Lottery {
 
         await Bank.transferMoney(client.user, winner.user, winner.winnings, 'lottery winner')
         
-        await oggbot.queryPool(`INSERT INTO lottery_winners (user_id, timestamp, amount) VALUES (?, DATE_FORMAT(TIMESTAMP(), '%Y-%m-%d %H:00:00'), ?)`, [winner.user.id, winner.winnings])
+        await Database.query(`INSERT INTO lottery_winners (user_id, timestamp, amount) VALUES (?, DATE_FORMAT(TIMESTAMP(), '%Y-%m-%d %H:00:00'), ?)`, [winner.user.id, winner.winnings])
 
-        await oggbot.queryPool('DELETE FROM lottery').catch(err => {
+        await Database.query('DELETE FROM lottery').catch(err => {
 
             console.log(err)
 

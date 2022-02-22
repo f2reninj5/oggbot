@@ -1,4 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
+const { Birthdays } = require(`${__root}/oggbot/index`)
 
 module.exports = {
 
@@ -18,26 +18,18 @@ module.exports = {
     },
     async execute(interaction) {
 
-        let userId
-
         try {
 
-            userId = interaction.options.getUser('user').id
+            let user = interaction.options.getUser('user') || interaction.user
 
-        } catch {
+            let birthday = await Birthdays.fetchBirthday(user)
+            let details = Birthdays.calculateDetails(birthday)
 
-            userId = interaction.user.id
+            await interaction.editReply({ content: `${user.username}'s birthday: <t:${birthday.valueOf() / 1000}:d> (${details.age})` })
+    
+        } catch (err) {
+
+            await interaction.editReply({ content: `Failed to get birthday because \`${err}\`.` })
         }
-
-        const user = await oggbot.fetchUser(userId)
-        
-        if (!user.birthday) {
-
-            interaction.editReply({ content: 'No birthday set.' })
-
-            return
-        }
-
-        interaction.editReply({ content: `${user.username}'s birthday: <t:${user.birthday.valueOf() / 1000}:d> (${user.age})` })
     }
 }

@@ -1,5 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
-const { lotteryValues } = require(`${__root}/config.json`)
+const { Bank, Lottery } = require(`${__root}/oggbot/index`)
 
 module.exports = {
 
@@ -10,42 +9,17 @@ module.exports = {
         type: 1
     },
     async execute(interaction) {
-
-        const user = await oggbot.fetchUser(interaction.user.id)
         
-        if (user.lottery.tickets) {
-
-            interaction.editReply({ content: 'You have already entered the lottery.' })
-
-            return
-        }
-
-        if (user.balance < lotteryValues.ticketPrice) {
-
-            interaction.editReply({ content: 'You cannot afford to enter the lottery.' })
-
-            return
-        }
-
-        let total = lotteryValues.ticketPrice + oggbot.roundMoney(lotteryValues.ticketPrice * lotteryValues.bonusRatio)
-
         try {
 
-            oggbot.moneyTransaction(user, client.user, lotteryValues.ticketPrice, 'lottery ticket')
-            oggbot.queryPool(`INSERT INTO lottery (user_id, amount) VALUES ('${user.id}', ${total})`).catch(err => {
-
-                console.log(err)
-
-                throw 'something went wrong when querying the database'
-            })
+            let user = interaction.user
+            let ticket = await Lottery.buyTicket(user)
+            
+            await interaction.editReply(`Purchased lottery ticket for ${Bank.format(ticket.price)}.`)
 
         } catch (err) {
 
-            interaction.editReply({ content: `Failed to purchase ticket because \`${err}\`.` })
-
-            return
+            await interaction.editReply({ content: `Failed to purchase ticket because \`${err}\`.` })
         }
-
-        interaction.editReply(`Purchased lottery ticket for ${oggbot.formatMoney(lotteryValues.ticketPrice)}`)
     }
 }

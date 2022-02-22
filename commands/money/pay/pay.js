@@ -1,4 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
+const { Bank } = require(`${__root}/oggbot/index`)
 const Discord = require('discord.js')
 const Canvas = require('canvas')
 const path = require('path')
@@ -52,18 +52,18 @@ module.exports = {
         async function createTransactionImage(sender, recipient, amount) {
 
             // create canvas
-            const canvas = Canvas.createCanvas(480, 200)
-            const context = canvas.getContext('2d')
+            let canvas = Canvas.createCanvas(480, 200)
+            let context = canvas.getContext('2d')
 
             // load pay image and draw background
-            const background = await Canvas.loadImage(path.resolve(__dirname, './pay.png'))
+            let background = await Canvas.loadImage(path.resolve(__dirname, './pay.png'))
             context.drawImage(background, 0, 0, canvas.width, canvas.height)
 
             let avatarSize = 134
 
             // load avatar images
-            const senderAvatar = await Canvas.loadImage(sender.displayAvatarURL({ format: 'jpg' }))
-            const recipientAvatar = await Canvas.loadImage(recipient.displayAvatarURL({ format: 'jpg' }))
+            let senderAvatar = await Canvas.loadImage(sender.displayAvatarURL({ format: 'jpg' }))
+            let recipientAvatar = await Canvas.loadImage(recipient.displayAvatarURL({ format: 'jpg' }))
 
             // set text settings
             context.textBaseline = 'middle'
@@ -75,7 +75,7 @@ module.exports = {
             context.fillText((sender.username.length > 15 ? sender.username.slice(0, 15) + '-' : sender.username), 106, (canvas.height / 2) + (avatarSize / 2) + 16)
             context.fillText((recipient.username.length > 15 ? recipient.username.slice(0, 15) + '-' : recipient.username), 374, (canvas.height / 2) + (avatarSize / 2) + 16)
             context.font = '36px Oggbot'
-            context.fillText(oggbot.formatMoney(amount), canvas.width / 2, 16)
+            context.fillText(Bank.format(amount), canvas.width / 2, 16)
 
             // create rounded rectangle clipping mask
             context.beginPath(); 
@@ -89,47 +89,28 @@ module.exports = {
             context.drawImage(recipientAvatar, 307, (canvas.height / 2) - (avatarSize / 2), avatarSize, avatarSize)
 
             // turn canvas into image attachment
-            const attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'transaction.png')
+            let attachment = new Discord.MessageAttachment(canvas.toBuffer(), 'transaction.png')
 
             return attachment
         }
 
-        const sender = await oggbot.fetchUser(interaction.user.id)
-        const recipient = await oggbot.fetchUser(interaction.options.getUser('recipient').id)
-        const amount = oggbot.roundMoney(interaction.options.getNumber('amount'))
-
-        if (!recipient.inDatabase) {
-
-            interaction.editReply({ content: 'Recipient not in database.' })
-
-            return
-        }
+        let sender = interaction.user
+        let recipient = interaction.options.getUser('recipient')
+        let amount = Bank.round(interaction.options.getNumber('amount'))
 
         if (sender.id == recipient.id) {
 
-            interaction.editReply({ content: 'You cannot pay yourself.' })
+            await interaction.editReply({ content: 'You cannot pay yourself.' })
 
             return
-        }
-
-        if (amount > sender.balance) {
-
-            interaction.editReply({ content: 'You do not have enough money for this transaction.' })
-
-            return
-        }
-
-        if (amount < 1) {
-
-            amount = 1
         }
 
         // create embed
-        const transactionEmbed = new Discord.MessageEmbed()
+        let transactionEmbed = new Discord.MessageEmbed()
             .setImage('attachment://transaction.png')
             .setFooter('Click confirm to continue.')
 
-        const confirmationButton = new Discord.MessageActionRow()
+        let confirmationButton = new Discord.MessageActionRow()
             .addComponents(
 
                 new Discord.MessageButton()
@@ -138,28 +119,35 @@ module.exports = {
                     .setStyle('PRIMARY')
             )
 
-        const transactionImage = await createTransactionImage(sender, recipient, amount)
+        let transactionImage = await createTransactionImage(sender, recipient, amount)
 
         // reply embed
         await interaction.editReply({ embeds: [transactionEmbed], files: [transactionImage], components: [confirmationButton] })
 
-        const filter = button => button.customId == 'confirmTransaction' && button.user.id == sender.id
-        const collector = interaction.channel.createMessageComponentCollector({ filter, time: 1000 * 10 })
+        let filter = button => button.customId == 'confirmTransaction' && button.user.id == sender.id
+        let collector = interaction.channel.createMessageComponentCollector({ filter, time: 1000 * 15 })
 
         collector.on('collect', async collected => {
 
             if (collected.customId == 'confirmTransaction') {
 
-                oggbot.moneyTransaction(sender, recipient, amount, 'pay', true, interaction)
+                try {
 
-                // update embed
-                transactionEmbed
-                    .setColor('#40a45c')
-                    .setFooter('Transaction complete.')
+                    await Bank.transferMoney(sender, recipient, amount, 'pay')
 
-                collected.update({ embeds: [transactionEmbed], files: [transactionImage], components: [] })
+                    transactionEmbed
+                        .setColor('#40a45c')
+                        .setFooter('Transaction complete.')
+                
+                } catch (err) {
 
-                collector.stop()
+                    transactionEmbed
+                        .setColor('#f04444')
+                        .setFooter(`Failed to pay recipient because ${err}.`)
+                }
+
+                await collected.update({ embeds: [transactionEmbed], files: [transactionImage], components: [] })
+                await collector.stop()
             }
         })
 
@@ -171,7 +159,7 @@ module.exports = {
                     .setColor('#f04444')
                     .setFooter('Transaction cancelled.')
 
-                interaction.editReply({ embeds: [transactionEmbed], files:[transactionImage], components: [] })
+                await interaction.editReply({ embeds: [transactionEmbed], files:[transactionImage], components: [] })
             }
         })
     }

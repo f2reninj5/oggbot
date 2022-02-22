@@ -1,5 +1,5 @@
-const Bank = require('./index')
-const oggbot = require(`${__root}/oggbot`)
+const Bank = require('./Bank')
+const Database = require('./Database')
 const { dailyValues } = require(`${__root}/config`)
 
 module.exports = class Claims {
@@ -43,19 +43,19 @@ module.exports = class Claims {
 
         await Bank.transferMoney(client.user, user, amount, 'daily')
 
-        await oggbot.queryPool('UPDATE dailies SET claimed = ?, streak = ? WHERE user_id = ?', [1, (streak % dailyValues.maxStreak), user.id]).catch(err => {
+        await Database.query('UPDATE dailies SET claimed = ?, streak = ? WHERE user_id = ?', [1, (streak % dailyValues.maxStreak), user.id]).catch(err => {
 
             console.log(err)
 
             throw 'something went wrong when querying the database'
         })
 
-        return { amount: amount, streak: streak }
+        return { amount: amount, streak: { value: streak, max: dailyValues.maxStreak } }
     }
 
     static async hasClaimedDaily(user) {
 
-        let rows = await oggbot.queryPool('SELECT claimed FROM dailies WHERE user_id = ?', [user.id]).catch(err => {
+        let rows = await Database.query('SELECT claimed FROM dailies WHERE user_id = ?', [user.id]).catch(err => {
 
             console.log(err)
 
@@ -87,7 +87,7 @@ module.exports = class Claims {
 
     static async fetchDailyStreak(user) {
 
-        let rows = await oggbot.queryPool('SELECT streak FROM dailies WHERE id = ?', [user.id]).catch(err => {
+        let rows = await Database.query('SELECT streak FROM dailies WHERE user_id = ?', [user.id]).catch(err => {
 
             console.log(err)
 
@@ -105,14 +105,14 @@ module.exports = class Claims {
     // resets claims and streaks accordingly
     static async progressDailies() {
 
-        await oggbot.queryPool('UPDATE dailies SET streak = 0 WHERE daily = 0').catch(err => {
+        await Database.query('UPDATE dailies SET streak = 0 WHERE claimed = 0').catch(err => {
 
             console.log(err)
 
             throw 'something went wrong when querying the database'
         })
 
-        await oggbot.queryPool('UPDATE dailies SET daily = 0').catch(err => {
+        await Database.query('UPDATE dailies SET claimed = 0').catch(err => {
 
             console.log(err)
 

@@ -1,5 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
-const { dailyValues } = require(`${__root}/config.json`)
+const { Bank, Claims } = require(`${__root}/oggbot/index`)
 
 module.exports = {
 
@@ -13,78 +12,16 @@ module.exports = {
     },
     async execute(interaction) {
 
-        // generate a random value within a range
-        function randomInteger(minimum, maximum) {
+        try {
 
-            let randomInteger = Math.floor(Math.random() * (maximum - minimum + 1)) + minimum
+            let claim = await Claims.collectDailyClaim(interaction.user)
 
-            return randomInteger
+            await interaction.editReply(`Received ${Bank.format(claim.amount)}.\n\`${Claims.generateStreak(claim.streak.value, claim.streak.max)}\``)
+
+        } catch (err) {
+
+            await interaction.editReply({ content: `Failed to claim daily because \`${err}\`.` })
+            await interaction.followUp({ content: `Try again <t:${Claims.calculateNextDailyDate().valueOf() / 1000}:R>`, ephemeral: true })
         }
-
-        // generate streak string for display
-        function generateStreak(streakValue) {
-
-            let streak = ''
-
-            // for number of stars
-            for (i = 0; i <= 4; i ++) {
-
-                // check if star is full or empty
-                if (i <= streakValue) {
-
-                    streak += '★'
-
-                } else {
-
-                    streak += '☆'
-
-                }
-            }
-
-            return streak
-        }
-
-        // create date for next daily
-        function createNextDailyDate() {
-
-            // create date for tomorrow at 00:00:00
-            let nextDaily = new Date()
-            nextDaily.setDate(nextDaily.getDate() + 1)
-            nextDaily.setHours(0, 0, 0, 0)
-
-            return nextDaily
-        }
-
-        const user = await oggbot.fetchUser(interaction.user.id)
-        let amount = randomInteger(dailyValues.minimum, dailyValues.maximum)
-
-        // check if daily complete
-        if (user.daily.used) {
-
-            let nextDailyDate = createNextDailyDate()
-            let timestamp = `<t:${nextDailyDate.valueOf() / 1000}:R>`
-
-            // send time until next daily
-            interaction.editReply(`Claim your daily bonus again **${timestamp}**.`)
-            
-            return
-        }
-
-        let currentStreak = user.daily.streak
-        user.daily.used = true
-        user.daily.streak += 1
-
-        // check if streak is finished
-        if (user.daily.streak >= 5) {
-
-            amount += dailyValues.bonus
-            user.daily.streak = 0
-        }
-
-        user.setDaily(user.daily)
-        oggbot.moneyTransaction(client.user, user, amount, 'daily')
-
-        // send amount received with streak
-        interaction.editReply(`Received ${oggbot.formatMoney(amount)}.\n\`${generateStreak(currentStreak)}\``)
     }
 }

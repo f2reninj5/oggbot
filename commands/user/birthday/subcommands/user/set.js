@@ -1,4 +1,4 @@
-const oggbot = require(`${__root}/oggbot`)
+const { Birthdays } = require(`${__root}/oggbot/index`)
 
 module.exports = {
 
@@ -83,22 +83,27 @@ module.exports = {
     },
     async execute(interaction) {
 
-        const user = await oggbot.fetchUser(interaction.user.id)
-        const year = interaction.options.getInteger('year')
-        const month = interaction.options.getString('month')
-        const day = interaction.options.getInteger('day')
-        const birthday = new Date(`${day} ${month} ${year}`)
-        birthday.setHours(0, 0, 0, 0)
+        try {
 
-        if (birthday == 'Invalid Date' || year > new Date().getFullYear()) {
+            const user = interaction.user
+            const year = interaction.options.getInteger('year')
+            const month = interaction.options.getString('month')
+            const day = interaction.options.getInteger('day')
+            const birthday = new Date(`${day} ${month} ${year}`)
+            birthday.setHours(0, 0, 0, 0)
 
-            interaction.editReply({ content: 'Invalid birthday.' })
+            if (birthday == 'Invalid Date' || year > new Date().getFullYear()) {
 
-            return
+                throw 'provided birthday is invalid'
+            }
+
+            await Birthdays.setBirthday(user, birthday)
+
+            await interaction.editReply({ content: `Set birthday to <t:${birthday.valueOf() / 1000}:d>.` })
+        
+        } catch (err) {
+
+            await interaction.editReply({ content: `Failed to set birthday because \`${err}\`.` })
         }
-
-        user.setBirthday(birthday)
-
-        interaction.editReply({ content: `Set birthday to <t:${birthday.valueOf() / 1000}:d>.` })
     }
 }

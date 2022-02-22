@@ -7,13 +7,13 @@ module.exports = {
     data: {
 
         name: 'lottery',
-        description: 'Purchase a lottery ticket and view information or winners.',
+        description: 'Purchase a lottery ticket and view statistics or winners.',
         type: 1,
         options: [
 
             {
-                name: 'information',
-                description: 'View information about the lottery.',
+                name: 'statistics',
+                description: 'View statistics about the lottery.',
                 type: 1
             },
             {
