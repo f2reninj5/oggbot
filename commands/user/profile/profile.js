@@ -72,11 +72,6 @@ module.exports = {
                         name: 'description',
                         description: 'Remove your description.',
                         type:5
-                    },
-                    {
-                        name: 'style',
-                        description: 'Remove your style.',
-                        type:5
                     }
                 ]
             }
