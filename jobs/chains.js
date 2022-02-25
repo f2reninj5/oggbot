@@ -46,9 +46,16 @@ module.exports = {
 
         client.on('messageCreate', message => {
 
-            if (message.content) {
+            try {
 
-                checkMessageChain(message.content, message.author, message.channel)
+                if (message.content) {
+    
+                    checkMessageChain(message.content, message.author, message.channel)
+                }
+
+            } catch (err) {
+
+                console.log(err)
             }
         })
     }
