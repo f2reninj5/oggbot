@@ -20,7 +20,7 @@ module.exports = {
 
             try {
 
-                let birthday = await Birthdays.fetchNearestBirthday()
+                let birthday = new Date()
                 let users = await Birthdays.fetchUsersByBirthday(birthday)
                 let lines = []
 

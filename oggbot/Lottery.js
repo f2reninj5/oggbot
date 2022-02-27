@@ -1,10 +1,16 @@
 const Bank = require('./Bank')
 const Database = require('./Database')
+const Users = require('./Users')
 const { lotteryValues } = require(`${__root}/config.json`)
 
 module.exports = class Lottery {
 
     static async buyTicket(user) {
+
+        if (!await Users.existsUser(user)) {
+
+            await Users.createUser(user)
+        }
 
         if (await this.hasTicket(user)) {
 
@@ -116,7 +122,7 @@ module.exports = class Lottery {
             throw 'something went wrong when querying the database'
         })
 
-        let lotteryStats = this.fetchStats()
+        let lotteryStats = await this.fetchStats()
 
         let winner = {
 
@@ -126,7 +132,12 @@ module.exports = class Lottery {
 
         await Bank.transferMoney(client.user, winner.user, winner.winnings, 'lottery winner')
         
-        await Database.query(`INSERT INTO lottery_winners (user_id, timestamp, amount) VALUES (?, DATE_FORMAT(TIMESTAMP(), '%Y-%m-%d %H:00:00'), ?)`, [winner.user.id, winner.winnings])
+        await Database.query(`INSERT INTO lottery_winners (user_id, timestamp, amount) VALUES (?, DATE_FORMAT(NOW(), '%Y-%m-%d %H:00:00'), ?)`, [winner.user.id, winner.winnings]).catch(err => {
+
+            console.log(err)
+
+            throw 'something went wrong when querying the database'
+        })
 
         await Database.query('DELETE FROM lottery').catch(err => {
 

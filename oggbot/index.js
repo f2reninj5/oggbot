@@ -7,5 +7,6 @@ module.exports = {
     Database: require('./Database'),
     Lottery: require('./Lottery'),
     Profiles: require('./Profiles'),
-    Rankings: require('./Rankings')
+    Rankings: require('./Rankings'),
+    Users: require('./Users')
 }

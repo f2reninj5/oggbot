@@ -1,5 +1,5 @@
-const oggbot = require(`${__root}/oggbot`)
 const Database = require('./Database')
+const Users = require('./Users')
 const fs = require('fs')
 
 module.exports = class Bank {
@@ -33,8 +33,17 @@ module.exports = class Bank {
 
     static async transferMoney(sender, recipient, amount, reason = 'unspecified') {
 
+        if (!await Users.existsUser(sender)) {
+
+            await Users.createUser(sender)
+        }
+
+        if (!await Users.existsUser(recipient)) {
+
+            throw 'user could not be found'
+        }
+
         sender.balance = await this.fetchBalance(sender)
-        recipient.balance = await this.fetchBalance(recipient) // ensures that recipient exists in database
         amount = this.round(amount)
 
         if (amount <= 0) {

@@ -1,5 +1,6 @@
 const Bank = require('./Bank')
 const Database = require('./Database')
+const Users = require('./Users')
 const { dailyValues } = require(`${__root}/config`)
 
 module.exports = class Claims {
@@ -27,6 +28,11 @@ module.exports = class Claims {
     }
 
     static async collectDailyClaim(user) {
+
+        if (!await this.existsClaimant(user)) {
+
+            await this.createClaimant(user)
+        }
 
         if (await this.hasClaimedDaily(user)) {
 
@@ -113,6 +119,38 @@ module.exports = class Claims {
         })
 
         await Database.query('UPDATE dailies SET claimed = 0').catch(err => {
+
+            console.log(err)
+
+            throw 'something went wrong when querying the database'
+        })
+    }
+
+    static async existsClaimant(user) {
+
+        let rows = await Database.query('SELECT * FROM dailies WHERE user_id = ?', [user.id]).catch(err => {
+
+            console.log(err)
+
+            throw 'something went wrong when querying the database'
+        })
+
+        if (rows.length < 1) {
+
+            return false
+        }
+
+        return true
+    }
+
+    static async createClaimant(user) {
+
+        if (!await Users.existsUser(user)) {
+
+            await Users.createUser(user)
+        }
+
+        await Database.query('INSERT INTO dailies (user_id) VALUE (?)', [user.id]).catch(err => {
 
             console.log(err)
 

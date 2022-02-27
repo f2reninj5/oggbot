@@ -36,7 +36,7 @@ client.on('ready', async () => {
     // await oggbot.loadApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
     // await oggbot.removeApplicationCommands([client.chatCommands, client.userCommands, client.messageCommands])
     oggbot.registerFonts('UbuntuMono')
-
+    
     console.log(`Version: ${version}`)
 })
 

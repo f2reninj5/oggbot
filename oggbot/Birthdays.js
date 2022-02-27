@@ -1,4 +1,5 @@
 const Database = require('./Database')
+const Users = require('./Users')
 
 module.exports = class Birthdays {
 
@@ -83,6 +84,11 @@ module.exports = class Birthdays {
     }
 
     static async setBirthday(user, birthday) {
+
+        if (!await Users.existsUser(user)) {
+
+            await Users.createUser(user)
+        }
 
         await Database.query('UPDATE users SET birthday = ? WHERE id = ?', [birthday, user.id]).catch(err => {
 
